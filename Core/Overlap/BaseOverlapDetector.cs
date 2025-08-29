@@ -44,7 +44,7 @@ public static class ScheduleExtensions {
     }
 
     public static (Schedule before, Schedule? after) SplitOnDayBoundary(this Schedule schedule) {
-        if (!schedule.CrossesBoundary)
+        if (!schedule.CrossesDayBoundary)
             return (schedule, null);
 
         var before = new Schedule(schedule);

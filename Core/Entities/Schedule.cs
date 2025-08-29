@@ -17,7 +17,7 @@ public class Schedule {
     public IReadOnlySet<DayOfWeek> DaysOfWeek => _daysOfWeek;
     public int RecurrenceInterval { get; private set; } = 1;
 
-    public bool CrossesBoundary => EndTime < StartTime;
+    public bool CrossesDayBoundary => EndTime < StartTime;
     public Schedule(TimeOnly startTime, TimeOnly endTime, DateOnly startDate, DateOnly? endDate = null) {
         
         if (startTime == endTime)
