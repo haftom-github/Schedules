@@ -8,19 +8,19 @@ using Core.ValueObjects;
 namespace Core.Services;
 
 public static class SlotService {
-    public static List<Slot> Generate(
+    public static List<Slot> GenerateSlots(
         TimeSpan slotSpan, DateOnly date, List<WorkSchedule> workSchedules, List<BlockedSchedule> blockedSchedules) {
         
         List<Slot> workingSlots = [];
         List<Slot> blockedSlots = [];
 
         foreach (var workSchedule in workSchedules) {
-            var slot = WholeSlotAt(workSchedule, date);
+            var slot = workSchedule.WholeSlotAt(date);
             if (slot != null) workingSlots.Add(slot);
         }
 
         foreach (var blockedSchedule in blockedSchedules) {
-            var slot = WholeSlotAt(blockedSchedule, date);
+            var slot = blockedSchedule.WholeSlotAt(date);
             if (slot != null) blockedSlots.Add(slot);
         }
 
@@ -39,10 +39,10 @@ public static class SlotService {
             }
         }
 
-        return FilterAndSort(minSpan, working);
+        return SliceFilterAndSort(minSpan, working);
     }
 
-    private static List<Slot> FilterAndSort(TimeSpan minSpan, List<Slot> slots) {
+    private static List<Slot> SliceFilterAndSort(TimeSpan minSpan, List<Slot> slots) {
 
         // slice each slot to a minimum slotSpan
         for (var i = 0; i < slots.Count; i++) {
@@ -69,7 +69,7 @@ public static class SlotService {
         return (org, biProd);
     }
 
-    private static Slot? WholeSlotAt(Schedule schedule, DateOnly date) {
+    private static Slot? WholeSlotAt(this Schedule schedule, DateOnly date) {
         var (fHalf, sHalf) = schedule.Split();
         var sequences = ToSequenceList(fHalf);
         foreach (var sequence in sequences) {
