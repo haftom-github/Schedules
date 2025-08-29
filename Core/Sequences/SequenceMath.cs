@@ -6,7 +6,7 @@ public static class SequenceMath {
         if (s1.IsInfinite && s2.IsInfinite)
             return InfiniteSequencesOverlap(s1, s2);
 
-        return GetOverlapOfSequences(s1, s2) != null;
+        return GetSequenceOfOverlaps(s1, s2) != null;
     }
 
     /// <summary>
@@ -16,21 +16,21 @@ public static class SequenceMath {
     /// <returns>
     /// returns null if the sequences don't overlap
     /// </returns>
-    public static ISequence? GetOverlapOfSequences(ISequence s1, ISequence s2) {
+    public static ISequence? GetSequenceOfOverlaps(ISequence s1, ISequence s2) {
         if (s1.IsInfinite && s2.IsInfinite)
-            return GetOverlapOfInfiniteSequences(s1, s2);
+            return GetSequenceOfOverlapsForInfiniteSequences(s1, s2);
 
         try {
             var finiteS1 = new FiniteSequence(s1.Start, s1.End ?? s2.End!.Value, s1.Interval);
             var finiteS2 = new FiniteSequence(s2.Start, s2.End ?? finiteS1.End!.Value, s2.Interval);
-            return GetOverlapOfFiniteSequences(finiteS1, finiteS2);
+            return GetSequenceOfOverlapsForFiniteSequences(finiteS1, finiteS2);
         }
         catch (ArgumentOutOfRangeException) {
             return null;
         }
     }
     
-    private static FiniteSequence? GetOverlapOfFiniteSequences(FiniteSequence s1, FiniteSequence s2) {
+    private static FiniteSequence? GetSequenceOfOverlapsForFiniteSequences(FiniteSequence s1, FiniteSequence s2) {
         if (s1.End < s2.Start || s2.End < s1.Start)
             return null;
 
@@ -75,7 +75,7 @@ public static class SequenceMath {
     }
 
     // a finite sequence argument will be treated as an infinite sequence
-    private static InfiniteSequence? GetOverlapOfInfiniteSequences(ISequence s1, ISequence s2) {
+    private static InfiniteSequence? GetSequenceOfOverlapsForInfiniteSequences(ISequence s1, ISequence s2) {
         var (gcd, x0, y0) = ExtendedGcd(s1.Interval, -s2.Interval);
         
         if ((s2.Start - s1.Start) % gcd != 0) return null; 
