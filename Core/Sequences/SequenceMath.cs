@@ -1,69 +1,36 @@
 namespace Core.Sequences;
 
 public static class SequenceMath {
-    private static int Gcd(int a, int b) {
-        while (a != 0) {
-            var temp = a;
-            a = b % a;
-            b = temp;
-        }
-        return b;
-    }
-    
-    private static (int gcd, int x, int y) ExtendedGcd(int a, int b) {
-        if (a == 0) 
-            return (b, 0, 1);
-        
-        var (gcd, x1, y1) = ExtendedGcd(b % a, a);
-        return (gcd, y1 - (b / a) * x1, x1);
+
+    public static bool SequencesOverlap(ISequence s1, ISequence s2) {
+        if (s1.IsInfinite && s2.IsInfinite)
+            return InfiniteSequencesOverlap(s1, s2);
+
+        return GetOverlapOfSequences(s1, s2) != null;
     }
 
     /// <summary>
-    /// checks if two sequences meet.
-    /// if both sequences are infinite
-    /// if one of the sequences is finite, the second sequence will be collapsed to the finite sequence's end.
+    /// returns all points of overlap as a sequence
+    /// if one of the sequences is finite, the second sequence will be collapsed to the common finite range
     /// </summary>
-    /// <param name="s1">first sequence</param>
-    /// <param name="s2">the second sequence</param>
-    /// <returns><c>true</c> if the sequences have a possibility of overlapping</returns>
-    public static bool Overlaps(ISequence s1, ISequence s2) {
-        if (!s1.IsFinite && !s2.IsFinite)
-            return OverlapsUnbounded(s1, s2);
-
-        return FirstOverlapSequence(s1, s2) != null;
-    }
-    
-    private static bool OverlapsUnbounded(ISequence s1, ISequence s2) {
-        var gcd = Gcd(s1.Interval, -s2.Interval);
-        return (s2.Start - s1.Start) % gcd != 0;
-    }
-
-    /// <summary>
-    /// computes first last and the number of overlapping occurrences.
-    /// if one of the sequences is finite, the second sequence will be collapsed to the finite
-    /// </summary>
-    /// <param name="s1">first sequence</param>
-    /// <param name="s2">second sequence</param>
     /// <returns>
-    /// returns a <c>tupple</c> of the <c>f</c>: first <c>l</c>: last and <c>count</c>: no of occurrences.
-    /// count <c>0</c> implies no overlap
-    /// count <c>null</c> implies infinite overlaps with <c>l</c>: being null
+    /// returns null if the sequences don't overlap
     /// </returns>
-    public static ISequence? FirstOverlapSequence(ISequence s1, ISequence s2) {
-        if (!s1.IsFinite && !s2.IsFinite)
-            return FirstOverlapInfinite(s1, s2);
+    public static ISequence? GetOverlapOfSequences(ISequence s1, ISequence s2) {
+        if (s1.IsInfinite && s2.IsInfinite)
+            return GetOverlapOfInfiniteSequences(s1, s2);
 
         try {
             var finiteS1 = new FiniteSequence(s1.Start, s1.End ?? s2.End!.Value, s1.Interval);
             var finiteS2 = new FiniteSequence(s2.Start, s2.End ?? finiteS1.End!.Value, s2.Interval);
-            return FirstOverlapFinite(finiteS1, finiteS2);
+            return GetOverlapOfFiniteSequences(finiteS1, finiteS2);
         }
         catch (ArgumentOutOfRangeException) {
             return null;
         }
     }
     
-    private static FiniteSequence? FirstOverlapFinite(FiniteSequence s1, FiniteSequence s2) {
+    private static FiniteSequence? GetOverlapOfFiniteSequences(FiniteSequence s1, FiniteSequence s2) {
         if (s1.End < s2.Start || s2.End < s1.Start)
             return null;
 
@@ -87,27 +54,28 @@ public static class SequenceMath {
         var tb = yStep < 0 ? Floor(y0 - bOccurence, yStep) : Ceil(y0 - bOccurence, yStep);
         var ra = xStep > 0 ? Ceil(-x0, xStep) : Floor(-x0, xStep);
         var rb = yStep < 0 ? Ceil(y0, yStep) : Floor(y0, yStep);
-        (int f, int l)? solution;
+        (int l, int u)? solution;
         if ((xStep ^ yStep) >= 0) {
             solution = xStep > 0
-                ? OverlapOfRange(ra, ta, tb, rb)
-                : OverlapOfRange(ta, ra, rb, tb);
+                ? FindBoundsOfIntersection((ra, ta), (tb, rb))
+                : FindBoundsOfIntersection((ta, ra), (rb, tb));
             if (solution == null) return null;
-            if (xStep < 0) solution = (solution.Value.l, solution.Value.f);
-            return new FiniteSequence(s1.S(x0 + solution.Value.f * xStep), 
-                s1.S(x0 + solution.Value.l * xStep), s1.Interval * Math.Abs(xStep));
+            if (xStep < 0) solution = (solution.Value.u, solution.Value.l);
+            return new FiniteSequence(s1.S(x0 + solution.Value.l * xStep), 
+                s1.S(x0 + solution.Value.u * xStep), s1.Interval * Math.Abs(xStep));
         }
 
         solution = xStep > 0
-            ? OverlapOfRange(ra, ta, rb, tb)
-            : OverlapOfRange(ta, ra, tb, rb);
+            ? FindBoundsOfIntersection((ra, ta), (rb, tb))
+            : FindBoundsOfIntersection((ta, ra), (tb, rb));
         if (solution == null) return null;
-        if (xStep < 0) solution = (solution.Value.l, solution.Value.f);
-        return new FiniteSequence(s1.S(x0 + solution.Value.f * xStep),
-                s1.S(x0 + solution.Value.l * xStep), s1.Interval * Math.Abs(xStep));
+        if (xStep < 0) solution = (solution.Value.u, solution.Value.l);
+        return new FiniteSequence(s1.S(x0 + solution.Value.l * xStep),
+                s1.S(x0 + solution.Value.u * xStep), s1.Interval * Math.Abs(xStep));
     }
 
-    private static InfiniteSequence? FirstOverlapInfinite(ISequence s1, ISequence s2) {
+    // a finite sequence argument will be treated as an infinite sequence
+    private static InfiniteSequence? GetOverlapOfInfiniteSequences(ISequence s1, ISequence s2) {
         var (gcd, x0, y0) = ExtendedGcd(s1.Interval, -s2.Interval);
         
         if ((s2.Start - s1.Start) % gcd != 0) return null; 
@@ -134,11 +102,33 @@ public static class SequenceMath {
         return new InfiniteSequence(s1.S(x0 + t.Value * xStep), s1.Interval * Math.Abs(xStep));
     }
 
-    private static (int l, int u)? OverlapOfRange(int al, int au, int bl, int bu) {
-        var minUpper = Math.Min(au, bu);
-        var maxLower = Math.Max(al, bl);
+    private static (int l, int u)? FindBoundsOfIntersection((int l, int u) a, (int l, int u) b) {
+        var minUpper = Math.Min(a.u, b.u);
+        var maxLower = Math.Max(a.l, b.l);
         if (minUpper < maxLower) return null;
         return (maxLower, minUpper);
+    }
+    
+    private static bool InfiniteSequencesOverlap(ISequence s1, ISequence s2) {
+        var gcd = Gcd(s1.Interval, -s2.Interval);
+        return (s2.Start - s1.Start) % gcd != 0;
+    }
+    
+    private static int Gcd(int a, int b) {
+        while (a != 0) {
+            var temp = a;
+            a = b % a;
+            b = temp;
+        }
+        return b;
+    }
+    
+    private static (int gcd, int x, int y) ExtendedGcd(int a, int b) {
+        if (a == 0) 
+            return (b, 0, 1);
+        
+        var (gcd, x1, y1) = ExtendedGcd(b % a, a);
+        return (gcd, y1 - (b / a) * x1, x1);
     }
     
     private static int Floor(int a, int b) =>

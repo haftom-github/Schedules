@@ -1,5 +1,6 @@
 using Core.Entities;
 using Core.Enums;
+using Core.Options;
 using Core.Sequences;
 
 namespace Core.Overlap;
@@ -18,13 +19,16 @@ public class WeeklyVsDailyOverlapDetector : BaseOverlapDetector {
             SequenceFactory.Create(s2.StartDate.DayNumber, s2.EndDate?.DayNumber, s2.RecurrenceInterval);
         
         foreach (var day in s1.RecurrenceDays) {
-            var s1Start = s1.StartDate.AddDays(0);
+            var s1Start = s1.StartDate.ToFirstDayOfWeek();
             while (s1Start.DayOfWeek != day) s1Start = s1Start.AddDays(1);
 
             var s1Sequence =
                 SequenceFactory.Create(s1Start.DayNumber, s1.EndDate?.DayNumber, s1.RecurrenceInterval * 7);
             
-            var overlap = SequenceMath.FirstOverlapSequence(s1Sequence, s2Sequence);
+            var overlap = SequenceMath.GetOverlapOfSequences(s1Sequence, s2Sequence);
+            if (overlap?.Start < s1.StartDate.DayNumber)
+                overlap = overlap.StartFromNext();
+            
             if (overlap != null) return overlap;
         }
 

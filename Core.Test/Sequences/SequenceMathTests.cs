@@ -8,13 +8,13 @@ public class SequenceMathTests {
         var s1 = new FiniteSequence(3, 20, 1);
         var s2 = new FiniteSequence(21, 40, 1);
         
-        var result = SequenceMath.Overlaps(s1, s2);
+        var result = SequenceMath.SequencesOverlap(s1, s2);
         Assert.False(result);
 
         s1 = new FiniteSequence(0, 69, 10);
         s2 = new FiniteSequence(65, 80, 5);
         
-        result = SequenceMath.Overlaps(s1, s2);
+        result = SequenceMath.SequencesOverlap(s1, s2);
         Assert.False(result);
         
         
@@ -25,18 +25,18 @@ public class SequenceMathTests {
         var s1 = new FiniteSequence(0, 900, 2);
         var s2 = new FiniteSequence(1, 5478, 2);
         
-        var result = SequenceMath.Overlaps(s1, s2);
+        var result = SequenceMath.SequencesOverlap(s1, s2);
         Assert.False(result);
 
         s1 = new FiniteSequence(0, 754893, 4);
         s2 = new FiniteSequence(1, 2457935, 6);
         
-        result = SequenceMath.Overlaps(s1, s2);
+        result = SequenceMath.SequencesOverlap(s1, s2);
         Assert.False(result);
         
         s1 = new FiniteSequence(30, 60, 5);
         s2 = new FiniteSequence(31, 37, 6);
-        result = SequenceMath.Overlaps(s1, s2);
+        result = SequenceMath.SequencesOverlap(s1, s2);
         Assert.False(result);
     }
     
@@ -51,7 +51,7 @@ public class SequenceMathTests {
         var s2 = new FiniteSequence(s2Start, s2End, step);
         var s1Fallback = new FiniteSequence(s1Start, s2.End!.Value, step);
 
-        Assert.Equal(SequenceMath.Overlaps(s1, s2), SequenceMath.Overlaps(s1Fallback, s2));
+        Assert.Equal(SequenceMath.SequencesOverlap(s1, s2), SequenceMath.SequencesOverlap(s1Fallback, s2));
     }
     
     [Fact]
@@ -59,30 +59,30 @@ public class SequenceMathTests {
         var s1 = new FiniteSequence(0, 20, 5);
         var s2 = new FiniteSequence(10, 30, 5);
         
-        var firstOverlap = SequenceMath.FirstOverlapSequence(s1, s2);
+        var firstOverlap = SequenceMath.GetOverlapOfSequences(s1, s2);
         Assert.NotNull(firstOverlap);
         Assert.Equal(10, firstOverlap.Start);
         
         s1 = new FiniteSequence(0, 20, 5);
         s2 = new FiniteSequence(21, 30, 5);
-        firstOverlap = SequenceMath.FirstOverlapSequence(s1, s2);
+        firstOverlap = SequenceMath.GetOverlapOfSequences(s1, s2);
         Assert.Null(firstOverlap);
         
         s1 = new FiniteSequence(0, 20, 5);
         s2 = new FiniteSequence(5, 25, 5);
-        firstOverlap = SequenceMath.FirstOverlapSequence(s1, s2);
+        firstOverlap = SequenceMath.GetOverlapOfSequences(s1, s2);
         Assert.NotNull(firstOverlap);
         Assert.Equal(5, firstOverlap.Start);
         
         s1 = new FiniteSequence(0, 20, 5);
         s2 = new FiniteSequence(0, 20, 5);
-        firstOverlap = SequenceMath.FirstOverlapSequence(s1, s2);
+        firstOverlap = SequenceMath.GetOverlapOfSequences(s1, s2);
         Assert.NotNull(firstOverlap);
         Assert.Equal(0, firstOverlap.Start);
         
         s1 = new FiniteSequence(0, 25, 5);
         s2 = new FiniteSequence(1, 26, 6);
-        firstOverlap = SequenceMath.FirstOverlapSequence(s1, s2);
+        firstOverlap = SequenceMath.GetOverlapOfSequences(s1, s2);
         Assert.NotNull(firstOverlap);
         Assert.Equal(25, firstOverlap.Start);
     }
@@ -112,7 +112,7 @@ public class SequenceMathTests {
     {
         var s1 = new InfiniteSequence(5, 3);  // 5, 8, 11, 14...
         var s2 = new InfiniteSequence(2, 4);  // 2, 6, 10, 14...
-        var overlap = SequenceMath.FirstOverlapSequence(s1, s2);
+        var overlap = SequenceMath.GetOverlapOfSequences(s1, s2);
         Assert.NotNull(overlap);
         Assert.Equal(14, overlap.Start);
     }
@@ -122,7 +122,7 @@ public class SequenceMathTests {
     {
         var s1 = new InfiniteSequence(10, 5);
         var s2 = new InfiniteSequence(10, 7);
-        var overlap = SequenceMath.FirstOverlapSequence(s1, s2);
+        var overlap = SequenceMath.GetOverlapOfSequences(s1, s2);
         Assert.NotNull(overlap);
         Assert.Equal(10, overlap.Start);
     }
@@ -132,7 +132,7 @@ public class SequenceMathTests {
     {
         var s1 = new InfiniteSequence(0, 4);
         var s2 = new InfiniteSequence(3, 6);
-        Assert.Null(SequenceMath.FirstOverlapSequence(s1, s2));
+        Assert.Null(SequenceMath.GetOverlapOfSequences(s1, s2));
     }
 
     [Theory]
@@ -146,7 +146,7 @@ public class SequenceMathTests {
         var s2 = new InfiniteSequence(start2, int2);
 
         var expected = BruteForceFirstOverlap(s1, s2);
-        var actual = SequenceMath.FirstOverlapSequence(s1, s2)?.Start;
+        var actual = SequenceMath.GetOverlapOfSequences(s1, s2)?.Start;
 
         Assert.Equal(expected, actual);
     }
@@ -156,7 +156,7 @@ public class SequenceMathTests {
         var s1 = new InfiniteSequence(0, 5);
         var s2 = new FiniteSequence(5, 10, 6);
         
-        var overlap = SequenceMath.FirstOverlapSequence(s1, s2);
+        var overlap = SequenceMath.GetOverlapOfSequences(s1, s2);
         Assert.NotNull(overlap);
     }
 }
