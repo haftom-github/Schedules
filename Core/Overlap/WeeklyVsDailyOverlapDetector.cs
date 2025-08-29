@@ -6,19 +6,19 @@ using Core.Sequences;
 namespace Core.Overlap;
 
 public class WeeklyVsDailyOverlapDetector : BaseOverlapDetector {
-    protected override ISequence? SplitDetect(Schedule s1, Schedule s2) {
+    protected override ISequence? DetectSplit(Schedule s1, Schedule s2) {
         if (s1.RecurrenceType != RecurrenceType.Weekly)
             (s1, s2) = (s2, s1);
         
         if (s1.RecurrenceType != RecurrenceType.Weekly || s2.RecurrenceType != RecurrenceType.Daily)
             throw new ArgumentException("one of the schedules must be weekly and the other daily");
 
-        if (OverlapImpossible(s1, s2)) return null;
+        if (OverlapIsImpossible(s1, s2)) return null;
 
         var s2Sequence =
             SequenceFactory.Create(s2.StartDate.DayNumber, s2.EndDate?.DayNumber, s2.RecurrenceInterval);
         
-        foreach (var day in s1.RecurrenceDays) {
+        foreach (var day in s1.DaysOfWeek) {
             var s1Start = s1.StartDate.ToFirstDayOfWeek();
             while (s1Start.DayOfWeek != day) s1Start = s1Start.AddDays(1);
 

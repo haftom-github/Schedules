@@ -12,7 +12,7 @@ public class ScheduleExtensionsTests {
         var endTime = TimeOnly.MaxValue;
         var schedule = new Schedule(startTime, endTime, _today);
 
-        var (s, e) = schedule.Split();
+        var (s, e) = schedule.SplitOnDayBoundary();
         
         Assert.Equal(schedule, s);
         Assert.Null(e);
@@ -24,18 +24,18 @@ public class ScheduleExtensionsTests {
         var endTime = new TimeOnly(4, 0);
         var schedule = new Schedule(startTime, endTime, _today);
         
-        var (s, _) = schedule.Split();
+        var (s, _) = schedule.SplitOnDayBoundary();
         
         Assert.Equal(s.StartTime, startTime);
         Assert.Equal(s.EndTime, TimeOnly.MaxValue);
         Assert.Equal(s.RecurrenceType, schedule.RecurrenceType);
         Assert.Equal(s.StartDate, schedule.StartDate);
         Assert.Equal(s.EndDate, schedule.EndDate);
-        Assert.Equal(s.RecurrenceDays, schedule.RecurrenceDays);
+        Assert.Equal(s.DaysOfWeek, schedule.DaysOfWeek);
         
         schedule.RecurWeekly([DayOfWeek.Monday], 7);
-        (s, _) = schedule.Split();
-        Assert.Equal(s.RecurrenceDays, schedule.RecurrenceDays);
+        (s, _) = schedule.SplitOnDayBoundary();
+        Assert.Equal(s.DaysOfWeek, schedule.DaysOfWeek);
         Assert.Equal(s.RecurrenceInterval, schedule.RecurrenceInterval);
     }
     
@@ -45,7 +45,7 @@ public class ScheduleExtensionsTests {
         var endTime = new TimeOnly(4, 0);
         var schedule = new Schedule(startTime, endTime, _today);
         
-        var (_, e) = schedule.Split();
+        var (_, e) = schedule.SplitOnDayBoundary();
 
         Assert.NotNull(e);
         Assert.Equal(e.StartTime, TimeOnly.MinValue);
@@ -53,12 +53,12 @@ public class ScheduleExtensionsTests {
         Assert.Equal(e.RecurrenceType, schedule.RecurrenceType);
         Assert.Equal(e.StartDate, schedule.StartDate.AddDays(1));
         Assert.Equal(e.EndDate, schedule.EndDate?.AddDays(1));
-        Assert.Equal(e.RecurrenceDays, schedule.RecurrenceDays);
+        Assert.Equal(e.DaysOfWeek, schedule.DaysOfWeek);
 
         schedule.RecurWeekly([DayOfWeek.Sunday, DayOfWeek.Monday], 7);
-        (_, e) = schedule.Split();
+        (_, e) = schedule.SplitOnDayBoundary();
         
         Assert.NotNull(e);
-        Assert.Equal(e.RecurrenceDays, [DayOfWeek.Monday, DayOfWeek.Tuesday]);
+        Assert.Equal(e.DaysOfWeek, [DayOfWeek.Monday, DayOfWeek.Tuesday]);
     }
 }

@@ -4,8 +4,8 @@ using Core.Sequences;
 namespace Core.Overlap;
 
 public class DailyOverlapDetector : BaseOverlapDetector {
-    protected override ISequence? SplitDetect(Schedule s1, Schedule s2) {
-        if (OverlapImpossible(s1, s2)) return null;
+    protected override ISequence? DetectSplit(Schedule s1, Schedule s2) {
+        if (OverlapIsImpossible(s1, s2)) return null;
 
         var s1Sequence = SequenceFactory.Create(s1.StartDate.DayNumber, s1.EndDate?.DayNumber, s1.RecurrenceInterval);
         

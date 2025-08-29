@@ -5,7 +5,7 @@ using Core.Sequences;
 namespace Core.Overlap;
 
 public abstract class BaseOverlapDetector : IOverlapDetector {
-    protected static bool OverlapImpossible(Schedule s1, Schedule s2) {
+    protected static bool OverlapIsImpossible(Schedule s1, Schedule s2) {
         return s1.StartTime >= s2.EndTime 
                || s2.StartTime >= s1.EndTime 
                || s1.StartDate > s2.EndDate
@@ -19,47 +19,45 @@ public abstract class BaseOverlapDetector : IOverlapDetector {
         ArgumentNullException.ThrowIfNull(s1);
         ArgumentNullException.ThrowIfNull(s2);
         
-        var (s1F, s1E) = s1.Split();
-        var (s2F, s2E) = s2.Split();
+        var (s1F, s1E) = s1.SplitOnDayBoundary();
+        var (s2F, s2E) = s2.SplitOnDayBoundary();
         
-        var overlap = SplitDetect(s1F, s2F);
+        var overlap = DetectSplit(s1F, s2F);
         if (overlap != null) return overlap;
         
-        overlap = s2E != null ? SplitDetect(s1F, s2E) : null;
+        overlap = s2E != null ? DetectSplit(s1F, s2E) : null;
         if (overlap != null) return overlap;
         
-        overlap = s1E != null ? SplitDetect(s1E, s2F) : null;
+        overlap = s1E != null ? DetectSplit(s1E, s2F) : null;
         if (overlap != null) return overlap;
         
         return s1E != null && s2E != null
-            ? SplitDetect(s1E, s2E) : null;
+            ? DetectSplit(s1E, s2E) : null;
     }
-    protected abstract ISequence? SplitDetect(Schedule s1, Schedule s2);
+    protected abstract ISequence? DetectSplit(Schedule s1, Schedule s2);
 }
 
 public static class ScheduleExtensions {
     
-    private static List<DayOfWeek> ShiftRight(IReadOnlySet<DayOfWeek> days) {
-        var shifted = days.Select(d => (DayOfWeek)(((int)d + 1) % 7)).ToList();
-        return shifted;
+    private static DayOfWeek ToNextDayOfWeek(this DayOfWeek day) {
+        return (DayOfWeek)(((int)day + 1) % 7);
     }
 
-    public static (Schedule f, Schedule? e) Split(this Schedule schedule) {
+    public static (Schedule before, Schedule? after) SplitOnDayBoundary(this Schedule schedule) {
         if (!schedule.CrossesBoundary)
             return (schedule, null);
 
-        var f = new Schedule(schedule.StartTime, TimeOnly.MaxValue, schedule.StartDate, schedule.EndDate);
-        if (schedule.RecurrenceType == RecurrenceType.Weekly)
-            f.RecurWeekly(schedule.RecurrenceDays.ToList(), schedule.RecurrenceInterval);
+        var before = new Schedule(schedule);
+        before.UpdateEndTime(TimeOnly.MaxValue);
         
-        else f.UpdateRecurrenceInterval(schedule.RecurrenceInterval);
+        var after = new Schedule(schedule);
+        after.UpdateStartTime(TimeOnly.MinValue);
+        after.UpdateStartDate(schedule.StartDate.AddDays(1));
+        after.UpdateEndDate(schedule.EndDate?.AddDays(1));
         
-        var e = new Schedule(TimeOnly.MinValue, schedule.EndTime, schedule.StartDate.AddDays(1), schedule.EndDate?.AddDays(1));
-        if (schedule.RecurrenceType == RecurrenceType.Weekly)
-            e.RecurWeekly(ShiftRight(schedule.RecurrenceDays), schedule.RecurrenceInterval);
+        var shiftedDaysOfWeek = schedule.DaysOfWeek.Select(d => d.ToNextDayOfWeek()).ToList();
+        after.UpdateDaysOfWeek(shiftedDaysOfWeek);
         
-        else e.UpdateRecurrenceInterval(schedule.RecurrenceInterval);
-        
-        return (f, e);
+        return (before, after);
     }
 }

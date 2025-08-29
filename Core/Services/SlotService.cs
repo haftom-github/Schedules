@@ -70,7 +70,7 @@ public static class SlotService {
     }
 
     private static Slot? WholeSlotAt(this Schedule schedule, DateOnly date) {
-        var (fHalf, sHalf) = schedule.Split();
+        var (fHalf, sHalf) = schedule.SplitOnDayBoundary();
         var sequences = ToSequenceList(fHalf);
         foreach (var sequence in sequences) {
             if (sequence.IsMember(date.DayNumber))
@@ -97,7 +97,7 @@ public static class SlotService {
             case RecurrenceType.Weekly:
                 List<ISequence> sequences = [];
                 var start = schedule.StartDate.ToFirstDayOfWeek();
-                foreach (var day in schedule.RecurrenceDays) {
+                foreach (var day in schedule.DaysOfWeek) {
                     while (start.DayOfWeek != day) start = start.AddDays(1);
                     var sequence = SequenceFactory.Create(start.DayNumber, schedule.EndDate?.DayNumber, schedule.RecurrenceInterval*7);
                     if (sequence.Start < schedule.StartDate.DayNumber) sequence = sequence.StartFromNext();

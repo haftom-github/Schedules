@@ -26,7 +26,7 @@ public class BlockedScheduleTests {
         Assert.Equal(TimeOnly.MaxValue, blockedTime.EndTime);
         Assert.Null(blockedTime.EndDate);
         Assert.Equal(RecurrenceType.Daily, blockedTime.RecurrenceType);
-        Assert.Empty(blockedTime.RecurrenceDays);
+        Assert.Empty(blockedTime.DaysOfWeek);
         Assert.Equal(1, blockedTime.RecurrenceInterval);
 
         // Act
@@ -71,7 +71,7 @@ public class BlockedScheduleTests {
 
         // Assert
         Assert.Equal(RecurrenceType.Weekly, blockedTime.RecurrenceType);
-        Assert.Equal(daysOfWeek.ToHashSet(), blockedTime.RecurrenceDays);
+        Assert.Equal(daysOfWeek.ToHashSet(), blockedTime.DaysOfWeek);
     }
     
     [Fact]
@@ -89,7 +89,7 @@ public class BlockedScheduleTests {
         // Assert
         Assert.Equal(RecurrenceType.Weekly, blockedTime.RecurrenceType);
         Assert.Equal(2, blockedTime.RecurrenceInterval);
-        Assert.Equal(daysOfWeek.ToHashSet(), blockedTime.RecurrenceDays);
+        Assert.Equal(daysOfWeek.ToHashSet(), blockedTime.DaysOfWeek);
     }
 
     [Fact]

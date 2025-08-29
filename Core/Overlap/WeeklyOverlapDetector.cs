@@ -6,14 +6,14 @@ using Core.Sequences;
 namespace Core.Overlap;
 
 public class WeeklyOverlapDetector : BaseOverlapDetector {
-    protected override ISequence? SplitDetect(Schedule s1, Schedule s2) {
+    protected override ISequence? DetectSplit(Schedule s1, Schedule s2) {
         if (s1.RecurrenceType != RecurrenceType.Weekly
             || s2.RecurrenceType != RecurrenceType.Weekly)
             throw new ArgumentException("can only detect overlaps between two weekly recurrent schedules");
 
-        if (OverlapImpossible(s1, s2)) return null;
+        if (OverlapIsImpossible(s1, s2)) return null;
 
-        var commonDaysOfWeek = s1.RecurrenceDays.Intersect(s2.RecurrenceDays).ToHashSet();
+        var commonDaysOfWeek = s1.DaysOfWeek.Intersect(s2.DaysOfWeek).ToHashSet();
         if (commonDaysOfWeek.Count == 0)
             return null;
         

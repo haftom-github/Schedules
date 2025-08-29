@@ -76,10 +76,10 @@ public class ScheduleTests {
         // Assert
         Assert.Equal(RecurrenceType.Weekly, schedule.RecurrenceType);
         Assert.Equal(2, schedule.RecurrenceInterval);
-        Assert.NotNull(schedule.RecurrenceDays);
-        Assert.Equal(2, schedule.RecurrenceDays.Count);
-        Assert.Contains(DayOfWeek.Monday, schedule.RecurrenceDays);
-        Assert.Contains(DayOfWeek.Wednesday, schedule.RecurrenceDays);
+        Assert.NotNull(schedule.DaysOfWeek);
+        Assert.Equal(2, schedule.DaysOfWeek.Count);
+        Assert.Contains(DayOfWeek.Monday, schedule.DaysOfWeek);
+        Assert.Contains(DayOfWeek.Wednesday, schedule.DaysOfWeek);
     }
 
     [Fact]

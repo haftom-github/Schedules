@@ -23,8 +23,8 @@ public class BlockedSchedule(
                 return (days % RecurrenceInterval) == 0;
 
             case RecurrenceType.Weekly:
-                if (RecurrenceDays.Count == 0) return false;
-                if (!RecurrenceDays.Contains(date.DayOfWeek)) return false;
+                if (DaysOfWeek.Count == 0) return false;
+                if (!DaysOfWeek.Contains(date.DayOfWeek)) return false;
                 if (RecurrenceInterval <= 1) return true;
                 var daysSinceStart = date.DayNumber - StartDate.DayNumber;
                 var weeksSinceStart = daysSinceStart / 7;
@@ -48,8 +48,8 @@ public class BlockedSchedule(
                 return (days % RecurrenceInterval) == 0;
 
             case RecurrenceType.Weekly:
-                if (RecurrenceDays.Count == 0) return false;
-                if (!RecurrenceDays.Contains(date.DayOfWeek)) return false;
+                if (DaysOfWeek.Count == 0) return false;
+                if (!DaysOfWeek.Contains(date.DayOfWeek)) return false;
                 if (RecurrenceInterval <= 1) return true;
                 var daysSinceStart = date.DayNumber - StartDate.DayNumber;
                 var weeksSinceStart = daysSinceStart / 7;
