@@ -1,11 +1,12 @@
 using Core.Entities;
+using Core.Options;
 using Core.Overlap;
 
 namespace Core.Test.Overlap;
 
 public class WeeklyVsDailyOverlapDetectorTests {
     private readonly WeeklyVsDailyOverlapDetector _overlapDetector = new();
-    private readonly DateOnly _today = DateOnly.FromDateTime(DateTime.UtcNow);
+    private readonly DateOnly _today = TimeSettings.Today;
 
     private readonly TimeOnly _commonStartTime = new(0, 0);
     private readonly TimeOnly _commonEndTime = new(1, 0);

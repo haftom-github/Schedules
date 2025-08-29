@@ -1,5 +1,6 @@
 using Core.Entities;
 using Core.Enums;
+using Core.Options;
 
 namespace Core.Test.Entities;
 
@@ -11,7 +12,7 @@ public class ScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         
         // Act
         var schedule = new Schedule(startTime, endTime, startDate);
@@ -23,7 +24,7 @@ public class ScheduleTests {
         Assert.Equal(RecurrenceType.Daily, schedule.RecurrenceType);
         Assert.Null(schedule.EndDate);
         
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
+        var endDate = TimeSettings.Today.AddDays(2);
         schedule = new Schedule(startTime, endTime, startDate, endDate);
         
         Assert.Equal(endDate, schedule.EndDate);
@@ -36,7 +37,7 @@ public class ScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var schedule = new Schedule(startTime, endTime, startDate);
         
         // Act
@@ -52,7 +53,7 @@ public class ScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var schedule = new Schedule(startTime, endTime, startDate);
         
         // Act & Assert
@@ -66,7 +67,7 @@ public class ScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var schedule = new Schedule(startTime, endTime, startDate);
         
         // Act
@@ -86,7 +87,7 @@ public class ScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var schedule = new Schedule(startTime, endTime, startDate);
         
         // Act & Assert
@@ -99,7 +100,7 @@ public class ScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var schedule = new Schedule(startTime, endTime, startDate);
         
         // Act & Assert
@@ -114,7 +115,7 @@ public class ScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var schedule = new Schedule(startTime, endTime, startDate);
         
         // Act
@@ -130,7 +131,7 @@ public class ScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var schedule = new Schedule(startTime, endTime, startDate);
         
         // Act & Assert

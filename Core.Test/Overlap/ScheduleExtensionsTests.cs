@@ -1,10 +1,11 @@
 using Core.Entities;
+using Core.Options;
 using Core.Overlap;
 
 namespace Core.Test.Overlap;
 
 public class ScheduleExtensionsTests {
-    private readonly DateOnly _today = DateOnly.FromDateTime(DateTime.UtcNow);
+    private readonly DateOnly _today = TimeSettings.Today;
     [Fact]
     public void Split_ShouldReturnTheScheduleAndNull_WhenScheduleDoesNotCrossDayBoundary() {
         var startTime = TimeOnly.MinValue;

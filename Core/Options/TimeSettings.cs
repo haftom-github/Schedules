@@ -2,7 +2,7 @@ namespace Core.Options;
 
 public static class TimeSettings {
     public static DateTime Now => DateTime.UtcNow;
-    public static DateTime Today => DateTime.UtcNow.Date;
+    public static DateOnly Today => DateOnly.FromDateTime(Now);
     
     private static DayOfWeek FirstDayOfWeek => DayOfWeek.Monday;
 

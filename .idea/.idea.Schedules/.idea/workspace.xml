@@ -5,17 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9e40fa48-9b2f-4a2d-bee9-02677b88d20e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Core.Test/Entities/BlockedScheduleTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core.Test/Entities/ScheduleTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core.Test/Overlap/DailyOverlapDetectorTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core.Test/Overlap/ScheduleExtensionsTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core.Test/Overlap/WeeklyOverlapDetectorTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core.Test/Overlap/WeeklyVsDailyOverlapDetectorTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core.Test/Sequences/FiniteSequenceTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core.Test/Sequences/SequenceMathTests.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core.Test/Services/SlotServiceTests.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Schedules/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Schedules/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core.Test/Core.Test.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Core.Test/Core.Test.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core.Test/Entities/BlockedScheduleTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core.Test/Entities/BlockedScheduleTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core.Test/Entities/ScheduleTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core.Test/Entities/ScheduleTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core.Test/Overlap/DailyOverlapDetectorTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core.Test/Overlap/DailyOverlapDetectorTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core.Test/Overlap/ScheduleExtensionsTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core.Test/Overlap/ScheduleExtensionsTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core.Test/Overlap/WeeklyVsDailyOverlapDetectorTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core.Test/Overlap/WeeklyVsDailyOverlapDetectorTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Options/TimeSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Options/TimeSettings.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +54,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1756449768065</updated>
-      <workItem from="1756449769866" duration="5472000" />
+      <workItem from="1756449769866" duration="6689000" />
     </task>
     <servers />
   </component>

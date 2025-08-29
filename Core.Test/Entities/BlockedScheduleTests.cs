@@ -1,5 +1,6 @@
 using Core.Entities;
 using Core.Enums;
+using Core.Options;
 
 namespace Core.Test.Entities;
 
@@ -15,8 +16,8 @@ public class BlockedScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
+        var startDate = TimeSettings.Today;
+        var endDate = TimeSettings.Today.AddDays(2);
 
         var blockedTime = new BlockedSchedule(_date610, null, null);
         
@@ -46,8 +47,8 @@ public class BlockedScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(0));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var endDate = TimeSettings.Today;
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new BlockedSchedule(startDate, startTime, endTime, endDate));
@@ -61,7 +62,7 @@ public class BlockedScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var blockedTime = new BlockedSchedule(startDate, startTime, endTime);
         List<DayOfWeek> daysOfWeek = [DayOfWeek.Monday, DayOfWeek.Monday, DayOfWeek.Wednesday];
 
@@ -78,7 +79,7 @@ public class BlockedScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var blockedTime = new BlockedSchedule(startDate, startTime, endTime);
         List<DayOfWeek> daysOfWeek = [DayOfWeek.Monday, DayOfWeek.Wednesday];
 
@@ -96,7 +97,7 @@ public class BlockedScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var blockedTime = new BlockedSchedule(startDate, startTime, endTime);
         
         // Act & Assert
@@ -109,7 +110,7 @@ public class BlockedScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var blockedTime = new BlockedSchedule(startDate, startTime, endTime);
 
         // Act & Assert
@@ -136,7 +137,7 @@ public class BlockedScheduleTests {
         // Arrange
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var startDate = TimeSettings.Today.AddDays(1);
         var blockedTime = new BlockedSchedule(startDate, startTime, endTime);
         
         // Act & Assert
@@ -177,12 +178,12 @@ public class BlockedScheduleTests {
     [Fact]
     public void IsWholeDayBlocked_ShouldReturnFalse_WhenDateIsBeforeStartDate() {
         // Arrange
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var endDate = TimeSettings.Today.AddDays(2);
         var blockedTime = new BlockedSchedule(startDate, null, null, endDate);
 
         // Act
-        var isBlocked = blockedTime.IsWholeDayBlocked(DateOnly.FromDateTime(DateTime.UtcNow));
+        var isBlocked = blockedTime.IsWholeDayBlocked(TimeSettings.Today);
 
         // Assert
         Assert.False(isBlocked);
@@ -193,7 +194,7 @@ public class BlockedScheduleTests {
         var blockedTimeWithTime = new BlockedSchedule(startDate, startTime, endTime, endDate);
         
         // Act
-        isBlocked = blockedTimeWithTime.IsWholeDayBlocked(DateOnly.FromDateTime(DateTime.UtcNow));
+        isBlocked = blockedTimeWithTime.IsWholeDayBlocked(TimeSettings.Today);
         
         // Assert
         Assert.False(isBlocked);
@@ -202,12 +203,12 @@ public class BlockedScheduleTests {
     [Fact]
     public void IsWholeDayBlocked_ShouldReturnFalse_WhenDateIsAfterEndDate() {
         // Arrange
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var endDate = TimeSettings.Today.AddDays(2);
         var blockedTime = new BlockedSchedule(startDate, null, null, endDate);
 
         // Act
-        var isBlocked = blockedTime.IsWholeDayBlocked(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3)));
+        var isBlocked = blockedTime.IsWholeDayBlocked(TimeSettings.Today.AddDays(3));
 
         // Assert
         Assert.False(isBlocked);
@@ -218,7 +219,7 @@ public class BlockedScheduleTests {
         var blockedTimeWithTime = new BlockedSchedule(startDate, startTime, endTime, endDate);
         
         // Act
-        isBlocked = blockedTimeWithTime.IsWholeDayBlocked(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3)));
+        isBlocked = blockedTimeWithTime.IsWholeDayBlocked(TimeSettings.Today.AddDays(3));
         
         // Assert
         Assert.False(isBlocked);
@@ -227,14 +228,14 @@ public class BlockedScheduleTests {
     [Fact]
     public void IsWholeDayBlocked_ShouldReturnFalse_WhenStartTimeAndEndTimeAreSet() {
         // Arrange
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var endDate = TimeSettings.Today.AddDays(2);
         var startTime = new TimeOnly(9, 0);
         var endTime = new TimeOnly(17, 0);
         var blockedTime = new BlockedSchedule(startDate, startTime, endTime, endDate);
         
         // Act
-        var isBlocked = blockedTime.IsWholeDayBlocked(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)));
+        var isBlocked = blockedTime.IsWholeDayBlocked(TimeSettings.Today.AddDays(1));
         
         // Assert
         Assert.False(isBlocked);
@@ -244,8 +245,8 @@ public class BlockedScheduleTests {
     [Fact]
     public void IsWholeDayBlocked_ShouldReturnTrue_WhenDateIsStartDate() {
         // Arrange
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var endDate = TimeSettings.Today.AddDays(2);
         var blockedTime = new BlockedSchedule(startDate, null, null, endDate);
 
         // Act
@@ -258,8 +259,8 @@ public class BlockedScheduleTests {
     [Fact]
     public void IsWholeDayBlocked_ShouldReturnTrue_WhenDateIsEndDate() {
         // Arrange
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var endDate = TimeSettings.Today.AddDays(2);
         var blockedTime = new BlockedSchedule(startDate: startDate, null, null, endDate: endDate);
         
         // Act
@@ -272,12 +273,12 @@ public class BlockedScheduleTests {
     [Fact]
     public void IsWholeDayBlocked_ShouldReturnTrue_WhenDateIsWithInBlockedTime() {
         // Arrange
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var endDate = TimeSettings.Today.AddDays(3);
         var blockedTime = new BlockedSchedule(startDate: startDate, null, null, endDate: endDate);
 
         // Act
-        var isBlocked = blockedTime.IsWholeDayBlocked(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2)));
+        var isBlocked = blockedTime.IsWholeDayBlocked(TimeSettings.Today.AddDays(2));
 
         // Assert
         Assert.True(isBlocked);
@@ -289,7 +290,7 @@ public class BlockedScheduleTests {
         var blockedTime = new BlockedSchedule(_date610, null, null);
 
         // Act
-        var isBlocked = blockedTime.IsWholeDayBlocked(DateOnly.FromDateTime(DateTime.UtcNow));
+        var isBlocked = blockedTime.IsWholeDayBlocked(TimeSettings.Today);
 
         // Assert
         Assert.True(isBlocked);
@@ -299,8 +300,8 @@ public class BlockedScheduleTests {
     [Fact]
     public void IsWholeDayBlocked_ShouldReturnTrue_WhenDateIsStartDateWeekly() {
         // Arrange
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var endDate = TimeSettings.Today.AddDays(4);
         var blockedTime = new BlockedSchedule(startDate: startDate, null, null, endDate: endDate);
         blockedTime.RecurWeekly([startDate.DayOfWeek, endDate.DayOfWeek]);
 
@@ -314,8 +315,8 @@ public class BlockedScheduleTests {
     [Fact]
     public void IsWholeDayBlocked_ShouldReturnTrue_WhenDateIsEndDateWeekly() {
         // Arrange
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var endDate = TimeSettings.Today.AddDays(4);
         var blockedTime = new BlockedSchedule(startDate: startDate, null, null, endDate: endDate);
         blockedTime.RecurWeekly([startDate.DayOfWeek, endDate.DayOfWeek]);
 
@@ -329,9 +330,9 @@ public class BlockedScheduleTests {
     [Fact]
     public void IsWholeDayBlocked_ShouldReturnTrue_WhenDateIsWithInBlockedTimeWeekly() {
         // Arrange
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var date = TimeSettings.Today.AddDays(2);
+        var endDate = TimeSettings.Today.AddDays(4);
         var blockedTime = new BlockedSchedule(startDate: startDate, null, null, endDate: endDate);
         blockedTime.RecurWeekly([date.DayOfWeek]);
 
@@ -345,9 +346,9 @@ public class BlockedScheduleTests {
     [Fact]
     public void IsWholeDayBlocked_ShouldReturnFalse_WhenDateIsWithInRageButDayIsNotInDaysList() {
         // Arrange
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
-        var date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3));
-        var endDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4));
+        var startDate = TimeSettings.Today.AddDays(1);
+        var date = TimeSettings.Today.AddDays(3);
+        var endDate = TimeSettings.Today.AddDays(4);
         var blockedTime = new BlockedSchedule(startDate: startDate, null, null, endDate: endDate);
         blockedTime.RecurWeekly([startDate.DayOfWeek, endDate.DayOfWeek]);
 
@@ -362,10 +363,10 @@ public class BlockedScheduleTests {
     public void IsWholeDayBlocked_ShouldReturnTrue_WhenStartDateAndEndDateAreNotSpecifiedAndDayOfWeekMatches() {
         // Arrange
         var blockedTime = new BlockedSchedule(_date610, null, null);
-        blockedTime.RecurWeekly([DateOnly.FromDateTime(DateTime.UtcNow).DayOfWeek]);
+        blockedTime.RecurWeekly([TimeSettings.Today.DayOfWeek]);
 
         // Act
-        var isBlocked = blockedTime.IsWholeDayBlocked(DateOnly.FromDateTime(DateTime.UtcNow));
+        var isBlocked = blockedTime.IsWholeDayBlocked(TimeSettings.Today);
 
         // Assert
         Assert.True(isBlocked);
@@ -375,7 +376,7 @@ public class BlockedScheduleTests {
     public void IsWholeDayBlocked_ShouldReturnFalse_WhenStartDateAndEndDateAreNotSpecifiedButDayOfWeekDoesNotMatch() {
         // Arrange
         var blockedTime = new BlockedSchedule(_date610, null, null);
-        var day1 = DateOnly.FromDateTime(DateTime.UtcNow);
+        var day1 = TimeSettings.Today;
         var day2 = day1.AddDays(1);
         var day3 = day1.AddDays(2);
         blockedTime.RecurWeekly([day1.DayOfWeek, day2.DayOfWeek]);
