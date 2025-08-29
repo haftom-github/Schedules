@@ -8,34 +8,32 @@ using Core.ValueObjects;
 namespace Core.Services;
 
 public static class SlotService {
-    public static List<TimeSlot> Generate(
-        TimeSpan slotSpan, Guid physicianId, DateOnly date, List<WorkSchedule> workSchedules, List<BlockedSchedule> blockedSchedules) {
+    public static List<Slot> Generate(
+        TimeSpan slotSpan, DateOnly date, List<WorkSchedule> workSchedules, List<BlockedSchedule> blockedSchedules) {
         
-        List<Period> workingPeriods = [];
-        List<Period> blockedPeriods = [];
+        List<Slot> workingSlots = [];
+        List<Slot> blockedSlots = [];
 
         foreach (var workSchedule in workSchedules) {
-            var period = PeriodAt(workSchedule, date);
-            if (period != null) workingPeriods.Add(period);
+            var slot = WholeSlotAt(workSchedule, date);
+            if (slot != null) workingSlots.Add(slot);
         }
 
         foreach (var blockedSchedule in blockedSchedules) {
-            var period = PeriodAt(blockedSchedule, date);
-            if (period != null) blockedPeriods.Add(period);
+            var slot = WholeSlotAt(blockedSchedule, date);
+            if (slot != null) blockedSlots.Add(slot);
         }
 
-        var availablePeriods = Generate(slotSpan, workingPeriods, blockedPeriods);
-        var slots = availablePeriods
-            .Select(p => ToTimeSlot(physicianId, date, p)).ToList();
+        var availableSlots = Generate(slotSpan, workingSlots, blockedSlots);
 
-        return slots;
+        return availableSlots;
     }
 
-    private static List<Period> Generate(TimeSpan minSpan, List<Period> working, List<Period> blocking) {
+    private static List<Slot> Generate(TimeSpan minSpan, List<Slot> working, List<Slot> blocking) {
         for (var i = 0; i < working.Count; i++) {
-            foreach (var period in blocking) {
+            foreach (var slot in blocking) {
                 if (!working[i].IsPositive) break;
-                var (org, biProd) = Block(working[i], period);
+                var (org, biProd) = Block(working[i], slot);
                 working[i] = org;
                 if(biProd != null) working.Insert(i+1, biProd);
             }
@@ -44,50 +42,46 @@ public static class SlotService {
         return FilterAndSort(minSpan, working);
     }
 
-    private static List<Period> FilterAndSort(TimeSpan minSpan, List<Period> periods) {
+    private static List<Slot> FilterAndSort(TimeSpan minSpan, List<Slot> slots) {
 
-        // slice each period to a minimum slotSpan
-        for (var i = 0; i < periods.Count; i++) {
-            if (!periods[i].IsPositive 
-                || periods[i].Span < 2 * minSpan) 
+        // slice each slot to a minimum slotSpan
+        for (var i = 0; i < slots.Count; i++) {
+            if (!slots[i].IsPositive 
+                || slots[i].Span < 2 * minSpan) 
                 continue;
             
-            periods.Insert(i+1, new Period(periods[i].Start.Add(minSpan), periods[i].Span - minSpan));
-            periods[i] = new Period(periods[i].Start, minSpan);
+            slots.Insert(i+1, new Slot(slots[i].Start.Add(minSpan), slots[i].Span - minSpan));
+            slots[i] = new Slot(slots[i].Start, minSpan);
             
         }
         
-        var filtered = periods.Where(p => p.IsPositive && p.Span >= minSpan).ToList();
+        var filtered = slots.Where(p => p.IsPositive && p.Span >= minSpan).ToList();
         filtered.Sort((a, b) => a.Start.CompareTo(b.Start));
         return filtered;
     }
 
-    private static (Period orgi, Period? biprod) Block(Period working, Period blocking) {
-        var org = new Period(working.Start, Min(blocking.Start, working.End));
-        var biProd = new Period(Max(blocking.End, working.Start), working.End);
+    private static (Slot orgi, Slot? biprod) Block(Slot working, Slot blocking) {
+        var org = new Slot(working.Start, Min(blocking.Start, working.End));
+        var biProd = new Slot(Max(blocking.End, working.Start), working.End);
 
         if (!org.IsPositive) (org, biProd) = (biProd, org);
         if (!biProd.IsPositive) biProd = null;
         return (org, biProd);
     }
 
-    private static TimeSlot ToTimeSlot(Guid physicianId, DateOnly date, Period period) {
-        return new TimeSlot(date, period.Start, period.Span);
-    }
-
-    private static Period? PeriodAt(Schedule schedule, DateOnly date) {
+    private static Slot? WholeSlotAt(Schedule schedule, DateOnly date) {
         var (fHalf, sHalf) = schedule.Split();
         var sequences = ToSequenceList(fHalf);
         foreach (var sequence in sequences) {
             if (sequence.IsMember(date.DayNumber))
-                return new Period(fHalf.StartTime, fHalf.EndTime);
+                return new Slot(fHalf.StartTime, fHalf.EndTime);
         }
 
         if (sHalf == null) return null;
         sequences = ToSequenceList(sHalf);
         foreach (var sequence in sequences) {
             if (sequence.IsMember(date.DayNumber))
-                return new Period(sHalf.StartTime, sHalf.EndTime);
+                return new Slot(sHalf.StartTime, sHalf.EndTime);
         }
         return null;
     }
