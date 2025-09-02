@@ -26,7 +26,7 @@ public class WeeklyOverlapDetector : BaseOverlapDetector {
         
             var s1Sequence = SequenceFactory.Create(s1Start.DayNumber, s1.EndDate?.DayNumber, s1.RecurrenceInterval * 7);
             var s2Sequence = SequenceFactory.Create(s2Start.DayNumber, s2.EndDate?.DayNumber, s2.RecurrenceInterval * 7);
-            var overlap = SequenceMath.GetSequenceOfOverlaps(s1Sequence, s2Sequence);
+            var overlap = s1Sequence.FindOverlapWith(s2Sequence);
             
             overlap =  overlap?.Start < s1.StartDate.DayNumber 
                    || overlap?.Start < s2.StartDate.DayNumber ? overlap.StartFromNext() : overlap;

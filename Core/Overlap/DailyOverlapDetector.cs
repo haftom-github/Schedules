@@ -11,6 +11,6 @@ public class DailyOverlapDetector : BaseOverlapDetector {
         
         var s2Sequence = SequenceFactory.Create(s2.StartDate.DayNumber, s2.EndDate?.DayNumber, s2.RecurrenceInterval);
         
-        return SequenceMath.GetSequenceOfOverlaps(s1Sequence, s2Sequence);
+        return s1Sequence.FindOverlapWith(s2Sequence);
     }
 }

@@ -2,11 +2,11 @@ namespace Core.Sequences;
 
 public static class SequenceMath {
 
-    public static bool SequencesOverlap(ISequence s1, ISequence s2) {
+    public static bool OverlapsWith(this ISequence s1, ISequence s2) {
         if (s1.IsInfinite && s2.IsInfinite)
             return InfiniteSequencesOverlap(s1, s2);
 
-        return GetSequenceOfOverlaps(s1, s2) != null;
+        return FindOverlapWith(s1, s2) != null;
     }
 
     /// <summary>
@@ -16,7 +16,7 @@ public static class SequenceMath {
     /// <returns>
     /// returns null if the sequences don't overlap
     /// </returns>
-    public static ISequence? GetSequenceOfOverlaps(ISequence s1, ISequence s2) {
+    public static ISequence? FindOverlapWith(this ISequence s1, ISequence s2) {
         if (s1.IsInfinite && s2.IsInfinite)
             return GetSequenceOfOverlapsForInfiniteSequences(s1, s2);
 

@@ -104,10 +104,10 @@ public class DailyOverlapDetectorTests {
         var end = _today.AddDays(30);
 
         var s1 = new Schedule(new TimeOnly(8, 0), new TimeOnly(9, 0), start, end);
-        s1.UpdateRecurrenceInterval(5); // hits end exactly
+        s1.UpdateRecurrenceInterval(5);
 
         var s2 = new Schedule(new TimeOnly(8, 0), new TimeOnly(9, 0), start.AddDays(5), end);
-        s2.UpdateRecurrenceInterval(25); // first hit at day 30
+        s2.UpdateRecurrenceInterval(25);
 
         var result = _overlapDetector.Detect(s1, s2);
 
