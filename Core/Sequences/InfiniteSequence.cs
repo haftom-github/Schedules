@@ -37,9 +37,8 @@ public class InfiniteSequence : ISequence {
         
         return SequenceFactory.Create(start, other.End, Interval);
     }
-    
-    
-    
+
+
     // equatable implementation
     public bool Equals(ISequence? other) {
         return Start == other?.Start && Interval == other.Interval;

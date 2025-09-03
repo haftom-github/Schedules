@@ -2,7 +2,7 @@ using Core.Sequences;
 
 namespace Core.Test.Sequences;
 
-public class SequenceTests {
+public class FiniteSequenceTests {
 
     [Fact]
     public void ShouldHaveLengthOfOne_WhenStartIsEqualToEnd() {
@@ -203,5 +203,44 @@ public class SequenceTests {
         var another = new InfiniteSequence(14);
         collapsed = sequence.CollapseToRangeOf(another);
         Assert.True(collapsed.IsEmpty);
+    }
+
+    [Fact]
+    public void CollapsingToEmpty_ShouldResultInEmpty() {
+        var sequence = new FiniteSequence(10, 15, 3);
+        var other = new FiniteSequence(14, 13);
+        
+        var collapsed = sequence.CollapseToRangeOf(other);
+        Assert.True(collapsed.IsEmpty);
+    }
+
+    [Fact]
+    public void OverlapsWithItSelf() {
+        var sequence = new FiniteSequence(10, 15, 3);
+        Assert.True(sequence.OverlapsWith(sequence));
+    }
+
+    [Fact]
+    public void NeverOverlapsWithEmpty() {
+        var sequence = new FiniteSequence(10, 15);
+        var other = new FiniteSequence(13, 11);
+        Assert.False(sequence.OverlapsWith(other));
+    }
+
+    [Fact]
+    public void DoesNotOverlap_WhenThereIsNoOverlapRange() {
+        var sequence = new FiniteSequence(10, 15, 3);
+        ISequence other = new FiniteSequence(14, 17);
+        Assert.False(sequence.OverlapsWith(other));
+        
+        other = new InfiniteSequence(14);
+        Assert.False(sequence.OverlapsWith(other));
+    }
+
+    [Fact]
+    public void DoesNotOverlap_WhenNoCommonElements() {
+        var sequence = new FiniteSequence(0, 2, 2);
+        ISequence other = new FiniteSequence(1, 3, 2);
+        Assert.False(sequence.OverlapsWith(other));
     }
 }

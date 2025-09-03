@@ -5,7 +5,7 @@ public static class SequenceMath {
     public static bool OverlapsWith(this ISequence s1, ISequence s2) {
         if (s1.IsInfinite && s2.IsInfinite)
             return InfiniteSequencesOverlap(s1, s2);
-
+    
         return FindOverlapWith(s1, s2) != null;
     }
 
@@ -17,23 +17,16 @@ public static class SequenceMath {
     /// returns null if the sequences don't overlap
     /// </returns>
     public static ISequence? FindOverlapWith(this ISequence s1, ISequence s2) {
-        if (s1.IsInfinite && s2.IsInfinite)
-            return GetSequenceOfOverlapsForInfiniteSequences(s1, s2);
-
-        try {
-            var finiteS1 = new FiniteSequence(s1.Start, s1.End ?? s2.End!.Value, s1.Interval);
-            var finiteS2 = new FiniteSequence(s2.Start, s2.End ?? finiteS1.End!.Value, s2.Interval);
-            return GetSequenceOfOverlapsForFiniteSequences(finiteS1, finiteS2);
-        }
-        catch (ArgumentOutOfRangeException) {
-            return null;
-        }
+        var collapsedS1 = s1.CollapseToRangeOf(s2);
+        if (collapsedS1.IsEmpty) return null;
+        var collapsedS2 = s2.CollapseToRangeOf(collapsedS1);
+        if (collapsedS1.IsInfinite)
+            return GetSequenceOfOverlapsForInfiniteSequences(collapsedS1, collapsedS2);
+    
+        return GetSequenceOfOverlapsForFiniteSequences((collapsedS1 as FiniteSequence)!, (collapsedS2 as FiniteSequence)!);
     }
     
     private static FiniteSequence? GetSequenceOfOverlapsForFiniteSequences(FiniteSequence s1, FiniteSequence s2) {
-        if (s1.End < s2.Start || s2.End < s1.Start)
-            return null;
-
         var (gcd, x0, y0) = ExtendedGcd(s1.Interval, -s2.Interval);
 
         if ((s2.Start - s1.Start) % gcd != 0)
@@ -113,8 +106,8 @@ public static class SequenceMath {
         var gcd = Gcd(s1.Interval, -s2.Interval);
         return (s2.Start - s1.Start) % gcd != 0;
     }
-    
-    public static int Gcd(int a, int b) {
+
+    private static int Gcd(int a, int b) {
         while (a != 0) {
             var temp = a;
             a = b % a;
@@ -122,8 +115,8 @@ public static class SequenceMath {
         }
         return b;
     }
-    
-    public static (int gcd, int x, int y) ExtendedGcd(int a, int b) {
+
+    private static (int gcd, int x, int y) ExtendedGcd(int a, int b) {
         if (a == 0) 
             return (b, 0, 1);
         

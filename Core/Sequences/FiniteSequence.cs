@@ -43,10 +43,8 @@ public class FiniteSequence : ISequence {
         
         return new FiniteSequence(start, Math.Min(End!.Value, other.End ?? End!.Value + 1), Interval);
     }
-    
-    
-    
-    
+
+
     // equatable implementations
     public bool Equals(ISequence? other) {
         return Start == other?.Start && End == other.End && Interval == other.Interval;
