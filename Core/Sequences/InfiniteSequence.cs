@@ -10,7 +10,7 @@ public class InfiniteSequence : ISequence {
 
     public InfiniteSequence(int start, int interval = 1) {
         if (interval <= 0)
-            throw new ArgumentOutOfRangeException(nameof(interval), "Interval must be a positive integer.");
+            throw new ArgumentOutOfRangeException(nameof(interval), "interval must be a positive integer.");
         
         Start = start;
         Interval = interval;
@@ -18,7 +18,7 @@ public class InfiniteSequence : ISequence {
 
     public int S(int n) {
         if (n < 0)
-            throw new ArgumentOutOfRangeException(nameof(n), "N must be a non-negative integer.");
+            throw new ArgumentOutOfRangeException(nameof(n), "index must be a non-negative integer.");
 
         return Start + n * Interval;
     }

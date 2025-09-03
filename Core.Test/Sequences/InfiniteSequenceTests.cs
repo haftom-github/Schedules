@@ -49,4 +49,26 @@ public class InfiniteSequenceTests {
         var shifted = sequence.StartFromIndex(1);
         Assert.Equal(21, shifted.S(0));
     }
+    
+    [Fact]
+    public void FirstElementShouldBeAMember() {
+        var sequence = new InfiniteSequence(10);
+        Assert.True(sequence.IsMember(10));
+    }
+
+    [Fact]
+    public void ShouldBeAMember() {
+        var sequence = new InfiniteSequence(10, 5);
+        Assert.True(sequence.IsMember(10));
+        Assert.True(sequence.IsMember(15));
+        Assert.True(sequence.IsMember(10 + 5 * 20));
+    }
+
+    [Fact]
+    public void ShouldNotBeAMember() {
+        var sequence = new InfiniteSequence(10, 3);
+        Assert.False(sequence.IsMember(11));
+        Assert.False(sequence.IsMember(12));
+        Assert.False(sequence.IsMember(10 + 3 * 20 + 2));
+    }
 }

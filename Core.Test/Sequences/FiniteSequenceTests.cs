@@ -102,4 +102,30 @@ public class SequenceTests {
         shifted = sequence.StartFromIndex(sequence.Length!.Value + 1);
         Assert.True(shifted.IsEmpty);
     }
+
+    [Fact]
+    public void FirstElementShouldBeAMemberIfNotEmpty() {
+        var sequence = new FiniteSequence(10, 10);
+        Assert.True(sequence.IsMember(10));
+    }
+
+    [Fact]
+    public void TheLastElementShouldBeAMemberIfNotEmptyAndIsEffectiveEnd() {
+        var sequence = new FiniteSequence(10, 455, 5);
+        Assert.True(sequence.IsMember(455));
+    }
+
+    [Fact]
+    public void TheLastElementShouldNotBeAMemberIfNotEmptyAndIsNotEffectiveEnd() {
+        var sequence = new FiniteSequence(10, 456, 5);
+        Assert.False(sequence.IsMember(456));
+    }
+
+    [Fact]
+    public void NoOneShouldBeAMember_WhenAnEmptySequence() {
+        var sequence = new FiniteSequence(10, 0);
+        Assert.False(sequence.IsMember(0));
+        Assert.False(sequence.IsMember(10));
+        Assert.False(sequence.IsMember(1));
+    }
 }
