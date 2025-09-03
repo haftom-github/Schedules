@@ -114,7 +114,7 @@ public static class SequenceMath {
         return (s2.Start - s1.Start) % gcd != 0;
     }
     
-    private static int Gcd(int a, int b) {
+    public static int Gcd(int a, int b) {
         while (a != 0) {
             var temp = a;
             a = b % a;
@@ -123,7 +123,7 @@ public static class SequenceMath {
         return b;
     }
     
-    private static (int gcd, int x, int y) ExtendedGcd(int a, int b) {
+    public static (int gcd, int x, int y) ExtendedGcd(int a, int b) {
         if (a == 0) 
             return (b, 0, 1);
         
@@ -131,9 +131,9 @@ public static class SequenceMath {
         return (gcd, y1 - (b / a) * x1, x1);
     }
     
-    private static int Floor(int a, int b) =>
+    public static int Floor(int a, int b) =>
         (a ^ b) < 0 ? a < 0 ? (a - b + 1) / b : (a - b -1) / b : a / b;
     
-    private static int Ceil(int a, int b) =>
+    public static int Ceil(int a, int b) =>
         (a ^ b) < 0 ? a / b : a < 0 ? (a + b + 1) / b : (a + b - 1) / b;
 }

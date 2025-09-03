@@ -100,7 +100,7 @@ public static class SlotService {
                 foreach (var day in schedule.DaysOfWeek) {
                     while (start.DayOfWeek != day) start = start.AddDays(1);
                     var sequence = SequenceFactory.Create(start.DayNumber, schedule.EndDate?.DayNumber, schedule.RecurrenceInterval*7);
-                    if (sequence.Start < schedule.StartDate.DayNumber) sequence = sequence.StartFromNext();
+                    if (sequence.Start < schedule.StartDate.DayNumber) sequence = sequence.StartFromIndex(1);
                     if (sequence != null)
                         sequences.Add(sequence);
                 }

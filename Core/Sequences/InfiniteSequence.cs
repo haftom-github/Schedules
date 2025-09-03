@@ -6,6 +6,7 @@ public class InfiniteSequence : ISequence {
     public int Interval { get; }
     public bool IsFinite => false;
     public int? Length => null;
+    public bool IsEmpty => false;
 
     public InfiniteSequence(int start, int interval = 1) {
         if (interval <= 0)
@@ -16,8 +17,8 @@ public class InfiniteSequence : ISequence {
     }
 
     public int S(int n) => Start + n * Interval;
-    public ISequence StartFromNext() {
-        return new  InfiniteSequence(S(1), Interval);
+    public ISequence StartFromIndex(int n) {
+        return new  InfiniteSequence(S(n), Interval);
     }
 
     public bool IsMember(int x) => x >= Start && (x - Start) % Interval == 0;

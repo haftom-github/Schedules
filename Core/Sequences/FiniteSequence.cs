@@ -6,33 +6,34 @@ public class FiniteSequence : ISequence {
     public int Interval { get; }
     public bool IsFinite => true;
     public int? Length => (End - Start) / Interval + 1;
+    public bool IsEmpty => Length < 1;
 
     public FiniteSequence(int start, int end, int interval = 1) {
         if (interval <= 0)
             throw new ArgumentOutOfRangeException(nameof(interval), "Interval must be a positive integer.");
         
-        if (end < start) 
-            throw new ArgumentOutOfRangeException(nameof(end), "End must be greater than start value.");
-        
-        var effectiveEnd = start + ((end - start) / interval) * interval;
-        if (start > effectiveEnd)
-            throw new ArgumentOutOfRangeException(nameof(start),$"Start must be less than effective end ({effectiveEnd}).");
+        // var effectiveEnd = start + SequenceMath.Floor(end - start, interval) * interval;
+        // if (start > effectiveEnd)
+        //     throw new ArgumentOutOfRangeException(nameof(start),$"Start must be less than effective end ({effectiveEnd}).");
 
         Start = start;
-        End = effectiveEnd;
+        End = end;
         Interval = interval;
     }
     
     public int S(int n) {
+        if (n < 0)
+            throw new ArgumentOutOfRangeException(nameof(n), "index must be greater than or equal to 0.");
+        
         var maxN = (End - Start) / Interval;
         if (n > maxN)
-            throw new ArgumentOutOfRangeException(nameof(n), $"n must be less than or equal to {maxN}.");
+            throw new ArgumentOutOfRangeException(nameof(n), $"index must be less than or equal to {maxN}.");
         
         return Start + n * Interval;
     }
 
-    public ISequence? StartFromNext() {
-        return Length == 1 ? null : new FiniteSequence(S(1), End!.Value, Interval);
+    public ISequence StartFromIndex(int n) {
+        return new FiniteSequence(Start + n * Interval, End!.Value, Interval);
     }
 
     public bool IsMember(int x) =>

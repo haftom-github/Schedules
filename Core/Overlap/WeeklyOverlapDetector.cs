@@ -29,7 +29,7 @@ public class WeeklyOverlapDetector : BaseOverlapDetector {
             var overlap = s1Sequence.FindOverlapWith(s2Sequence);
             
             overlap =  overlap?.Start < s1.StartDate.DayNumber 
-                   || overlap?.Start < s2.StartDate.DayNumber ? overlap.StartFromNext() : overlap;
+                   || overlap?.Start < s2.StartDate.DayNumber ? overlap.StartFromIndex(1) : overlap;
         
             if (overlap != null) return overlap;
             s1Start = s1.StartDate.ToFirstDayOfWeek();

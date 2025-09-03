@@ -27,7 +27,7 @@ public class WeeklyVsDailyOverlapDetector : BaseOverlapDetector {
             
             var overlap = s1Sequence.FindOverlapWith(s2Sequence);
             if (overlap?.Start < s1.StartDate.DayNumber)
-                overlap = overlap.StartFromNext();
+                overlap = overlap.StartFromIndex(1);
             
             if (overlap != null) return overlap;
         }
