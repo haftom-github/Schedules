@@ -13,12 +13,18 @@
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ECSharpPlaceEmbeddedOnSameLineMigration/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ECSharpUseContinuousIndentInsideBracesMigration/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ESettingsUpgrade_002EMigrateBlankLinesAroundFieldToBlankLinesAroundProperty/@EntryIndexedValue">True</s:Boolean>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=63d904a0_002D40f8_002D48d3_002Dabf3_002D92f6bf996fba/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="StartFromIndex_ShouldReturnAnEmptySequence_WhenIndexIsGreaterThanOrEqualToLength" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=2cd66ac2_002D8275_002D4087_002Db142_002Df0e904573454/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ShouldHaveLengthOfNull" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.SequenceTests.StartFromIndex_ShouldReturnAnEmptySequence_WhenIndexIsGreaterThanOrEqualToLength&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.SequenceTests.StartFromIndex_ShouldReturnAnEmptySequence_WhenLengthIsOneAndIndexIsOne&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.ShouldHaveLengthOfNull&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.ShouldReturnTheFirstElement_For0&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.ShouldThrowException_WhenNegativeIndex&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.ShouldReturnTheElementAtIndex_WhenInRange&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.StartFromIndex_ShouldReturnASequenceThatStartsFromTheFirstElement_WhenIndexIsZero&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.StartFromIndex_ShouldReturnASequenceThatStartsFromTheSecondElement_WhenIndexIsOne&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.ShouldNotBeEmpty&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	
 	
 	
 	

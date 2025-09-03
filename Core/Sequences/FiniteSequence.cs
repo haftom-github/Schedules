@@ -11,10 +11,6 @@ public class FiniteSequence : ISequence {
     public FiniteSequence(int start, int end, int interval = 1) {
         if (interval <= 0)
             throw new ArgumentOutOfRangeException(nameof(interval), "Interval must be a positive integer.");
-        
-        // var effectiveEnd = start + SequenceMath.Floor(end - start, interval) * interval;
-        // if (start > effectiveEnd)
-        //     throw new ArgumentOutOfRangeException(nameof(start),$"Start must be less than effective end ({effectiveEnd}).");
 
         Start = start;
         End = end;
@@ -32,9 +28,8 @@ public class FiniteSequence : ISequence {
         return Start + n * Interval;
     }
 
-    public ISequence StartFromIndex(int n) {
-        return new FiniteSequence(Start + n * Interval, End!.Value, Interval);
-    }
+    public ISequence StartFromIndex(int n) =>
+        new FiniteSequence(Start + n * Interval, End!.Value, Interval);
 
     public bool IsMember(int x) =>
         x >= Start && x <= End && (x - Start) % Interval == 0;

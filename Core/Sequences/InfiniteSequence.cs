@@ -16,10 +16,15 @@ public class InfiniteSequence : ISequence {
         Interval = interval;
     }
 
-    public int S(int n) => Start + n * Interval;
-    public ISequence StartFromIndex(int n) {
-        return new  InfiniteSequence(S(n), Interval);
+    public int S(int n) {
+        if (n < 0)
+            throw new ArgumentOutOfRangeException(nameof(n), "N must be a non-negative integer.");
+
+        return Start + n * Interval;
     }
+
+    public ISequence StartFromIndex(int n) =>
+        new  InfiniteSequence(S(n), Interval);
 
     public bool IsMember(int x) => x >= Start && (x - Start) % Interval == 0;
 }
