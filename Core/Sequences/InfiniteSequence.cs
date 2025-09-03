@@ -28,6 +28,19 @@ public class InfiniteSequence : ISequence {
 
     public bool IsMember(int x) => x >= Start && (x - Start) % Interval == 0;
 
+    
+    public ISequence CollapseToRangeOf(ISequence other) {
+        // Start + Interval * n >= other.Start
+        // n >= Ceil((other.Start - Start) / Interval)
+        var n = SequenceMath.Ceil(other.Start - Start, Interval);
+        var start = Math.Max(Start, Start + n * Interval);
+        
+        return SequenceFactory.Create(start, other.End, Interval);
+    }
+    
+    
+    
+    // equatable implementation
     public bool Equals(ISequence? other) {
         return Start == other?.Start && Interval == other.Interval;
     }
