@@ -11,5 +11,5 @@ public interface ISequence : IEquatable<ISequence> {
     public int S(int n);
     public ISequence StartFromIndex(int n);
     public bool IsMember(int x);
-    public bool IsNotMember(int x) => !IsMember(x);
+    public ISequence CollapseToRangeOf(ISequence other);
 }

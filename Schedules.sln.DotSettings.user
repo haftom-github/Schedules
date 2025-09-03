@@ -14,16 +14,19 @@
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ECSharpUseContinuousIndentInsideBracesMigration/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ESettingsUpgrade_002EMigrateBlankLinesAroundFieldToBlankLinesAroundProperty/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=798b945c_002D571c_002D4b92_002Dbc79_002Db7448e7aa99e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ShouldCollapse_ToEmptySequence_WhenNoCommonRange" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.SequenceTests.ShouldCollapse_ToEmptySequence_WhenNoCommonRange&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.ShouldCollapseToSelf&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.StartOfTheCollapsed_ShouldBeEqualToTheOtherSequencesStart_WhenTheLaterIsBiggerAndTheLaterIsAMemberOfTheOriginal&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.StartOfTheCollapsed_ShouldBeEqualToTheOriginalSequencesStart_WhenTheFormerIsBigger&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.StartOfTheCollapsed_ShouldBeEqualToTheSmallestMemberInTheRangeOfTheOther_WhenTheLaterIsBiggerAndTheLaterIsNotMemberOfTheOriginal&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.IntervalOfTheCollapsed_ShouldBeEqualToTheIntervalOfTheOriginal&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.EndShouldBe_EqualToEndOfTheOther_WhenTheOtherIsFinite&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+  &lt;Or&gt;&#xD;
+    &lt;TestAncestor&gt;&#xD;
+      &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.SequenceTests.ShouldCollapse_ToEmptySequence_WhenNoCommonRange&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.ShouldCollapseToSelf&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.StartOfTheCollapsed_ShouldBeEqualToTheOtherSequencesStart_WhenTheLaterIsBiggerAndTheLaterIsAMemberOfTheOriginal&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.StartOfTheCollapsed_ShouldBeEqualToTheOriginalSequencesStart_WhenTheFormerIsBigger&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.StartOfTheCollapsed_ShouldBeEqualToTheSmallestMemberInTheRangeOfTheOther_WhenTheLaterIsBiggerAndTheLaterIsNotMemberOfTheOriginal&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.IntervalOfTheCollapsed_ShouldBeEqualToTheIntervalOfTheOriginal&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests.EndShouldBe_EqualToEndOfTheOther_WhenTheOtherIsFinite&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Sequences.InfiniteSequenceTests&lt;/TestId&gt;&#xD;
+    &lt;/TestAncestor&gt;&#xD;
+    &lt;ProjectFile&gt;7CA57A64-20AB-4365-976F-B83E699BB6CA/d:Sequences/f:FiniteSequenceTests.cs&lt;/ProjectFile&gt;&#xD;
+  &lt;/Or&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	
 	

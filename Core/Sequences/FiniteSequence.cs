@@ -35,7 +35,7 @@ public class FiniteSequence : ISequence {
         x >= Start && x <= End && (x - Start) % Interval == 0;
 
     
-    public FiniteSequence CollapseToRangeOf(ISequence other) {
+    public ISequence CollapseToRangeOf(ISequence other) {
         // Start + Interval * n >= other.Start
         // n >= Ceil((other.Start - Start) / Interval)
         var n = SequenceMath.Ceil(other.Start - Start, Interval);
