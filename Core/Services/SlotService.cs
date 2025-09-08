@@ -1,7 +1,5 @@
 using Core.Entities;
-using Core.Enums;
 using Core.Options;
-using Core.Overlap;
 using Core.Sequences;
 using Core.ValueObjects;
 
@@ -15,13 +13,13 @@ public static class SlotService {
         List<Slot> blockedSlots = [];
 
         foreach (var workSchedule in workSchedules) {
-            var slot = workSchedule.WholeSlotAt(date);
-            if (slot != null) workingSlots.Add(slot);
+            var slots = workSchedule.SlotsAtDate(date);
+            workingSlots.AddRange(slots);
         }
 
         foreach (var blockedSchedule in blockedSchedules) {
-            var slot = blockedSchedule.WholeSlotAt(date);
-            if (slot != null) blockedSlots.Add(slot);
+            var slots = blockedSchedule.SlotsAtDate(date);
+            blockedSlots.AddRange(slots);
         }
 
         var availableSlots = Generate(slotSpan, workingSlots, blockedSlots);
@@ -67,23 +65,6 @@ public static class SlotService {
         if (!org.IsPositive) (org, biProd) = (biProd, org);
         if (!biProd.IsPositive) biProd = null;
         return (org, biProd);
-    }
-
-    private static Slot? WholeSlotAt(this Schedule schedule, DateOnly date) {
-        var (fHalf, sHalf) = schedule.SplitOnDayBoundary();
-        var sequences = ToSequenceList(fHalf);
-        foreach (var sequence in sequences) {
-            if (sequence.IsMember(date.DayNumber))
-                return new Slot(fHalf.StartTime, fHalf.EndTime);
-        }
-
-        if (sHalf == null) return null;
-        sequences = ToSequenceList(sHalf);
-        foreach (var sequence in sequences) {
-            if (sequence.IsMember(date.DayNumber))
-                return new Slot(sHalf.StartTime, sHalf.EndTime);
-        }
-        return null;
     }
 
     private static List<ISequence> ToSequenceList(Schedule schedule) {

@@ -1,8 +1,8 @@
 namespace Core.Entities;
 
-public class WorkSchedule(TimeOnly startTime, TimeOnly endTime, DateOnly startDate, DateOnly? endDate = null)
-    : Schedule(startTime, endTime, startDate, endDate) {
-    
-    
-    protected WorkSchedule() : this(TimeOnly.MinValue, TimeOnly.MaxValue, DateOnly.MinValue) { }
-}
+public class WorkSchedule(
+    DateOnly startDate,
+    DateOnly? endDate = null,
+    TimeOnly? startTime = null,
+    TimeOnly? endTime = null)
+    : Schedule(startDate, endDate, startTime, endTime) { }

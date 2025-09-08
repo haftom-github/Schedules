@@ -1,16 +1,11 @@
-using Core.Enums;
-
 namespace Core.Entities;
 
 public class BlockedSchedule(
     DateOnly startDate,
-    TimeOnly? startTime,
-    TimeOnly? endTime,
-    DateOnly? endDate = null)
-    : Schedule(startTime ?? TimeOnly.MinValue,
-        endTime ?? TimeOnly.MaxValue,
-        startDate,
-        endDate) {
+    DateOnly? endDate = null,
+    TimeOnly? startTime = null,
+    TimeOnly? endTime = null)
+    : Schedule(startDate, endDate, startTime, endTime) {
     
     public bool IsWholeDayBlocked(DateOnly date) {
         if (StartDate > date || EndDate < date) return false;

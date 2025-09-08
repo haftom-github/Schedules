@@ -1,10 +1,11 @@
 namespace Core.ValueObjects;
 
-public sealed class Slot(TimeOnly start, TimeOnly end) : IEquatable<Slot> {
-    public TimeOnly Start { get; } = start;
-    public TimeOnly End { get; } = end;
-    public TimeSpan Span { get; } = end - start;
-    public bool IsPositive { get; } = start < end;
+public sealed class Slot(TimeOnly? start = null, TimeOnly? end = null) : IEquatable<Slot> {
+    public TimeOnly Start { get; } = start ?? TimeOnly.MinValue;
+    public TimeOnly End { get; } = end ?? TimeOnly.MaxValue;
+    public TimeSpan Span => Start - End;
+    public bool IsPositive =>  Start < End;
+    public bool IsFullDay => Start == TimeOnly.MinValue && End == TimeOnly.MaxValue;
     
     public Slot(TimeOnly start, TimeSpan span) : this(start, start.Add(span)){}
 
