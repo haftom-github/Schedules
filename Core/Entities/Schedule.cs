@@ -1,3 +1,4 @@
+using Core.Options;
 using Core.Sequences;
 using Core.ValueObjects;
 
@@ -6,8 +7,8 @@ namespace Core.Entities;
 public class Schedule {
     public DateOnly StartDate { get; }
     public DateOnly? EndDate { get; }
-    public TimeOnly StartTime { get; private set; }
-    public TimeOnly EndTime { get; private set; }
+    public TimeOnly StartTime { get; }
+    public TimeOnly EndTime { get; }
 
     public RecurrenceType RecurrenceType { get; private set; } = RecurrenceType.Daily;
     public int RecurrenceInterval { get; private set; } = 1;
@@ -16,7 +17,7 @@ public class Schedule {
     public bool IsForever => EndDate is null;
     public bool CrossesDayBoundary => StartTime > EndTime;
 
-    public Schedule(DateOnly startDate, DateOnly? endDate = null, TimeOnly? startTime = null, TimeOnly? endTime = null) {
+    public  Schedule(DateOnly startDate, DateOnly? endDate = null, TimeOnly? startTime = null, TimeOnly? endTime = null) {
         
         if (startDate > endDate)
             throw new ArgumentException("end of schedule should not come before its start");
@@ -49,7 +50,7 @@ public class Schedule {
             DaysOfWeek.Add(day);
     }
 
-    public List<Slot> SlotsAtDate(DateOnly date)
+    public List<Slot> SlotsAtDate(DateOnly date) 
     {
         var sequenceMap = ToSequencesMap();
         var periods = new List<Slot>();
@@ -65,40 +66,66 @@ public class Schedule {
         return periods;
     }
 
-    public Schedule[] SplitOnDayBoundary()
+    public Schedule[] SplitOnDayBoundary() 
     {
         if (!CrossesDayBoundary)
             return [this];
 
         var beforeMidnight = new Schedule(StartDate, EndDate, StartTime, TimeOnly.MaxValue);
-        beforeMidnight.UpdateRecurrence(RecurrenceType, RecurrenceInterval);
+        beforeMidnight.UpdateRecurrence(type: RecurrenceType, daysOfWeek: DaysOfWeek, interval: RecurrenceInterval);
 
         var afterMidnight = new Schedule(
             StartDate.AddDays(1),
             EndDate?.AddDays(1),
             TimeOnly.MinValue, EndTime);
 
-        afterMidnight.UpdateRecurrence(RecurrenceType, RecurrenceInterval);
-
+        var shiftedDaysOfWeek = DaysOfWeek.Select(d => d.ToNextDayOfWeek()).ToHashSet();
+        afterMidnight.UpdateRecurrence(type: RecurrenceType, daysOfWeek: shiftedDaysOfWeek, interval: RecurrenceInterval);
         return [beforeMidnight, afterMidnight];
     }
 
-    private Dictionary<string, ISequence[]> ToSequencesMap()
-    {
+    private Dictionary<string, List<ISequence>> ToSequencesMap() {
         var splits = SplitOnDayBoundary();
         var keys = new[] { "before", "after" };
-        var map = new Dictionary<string, ISequence[]>();
+        var map = new Dictionary<string, List<ISequence>>();
 
-        for (var i = 0; i < splits.Length; i++)
-        {
-            map[keys[i]] =
-            [
-                SequenceFactory.Create(
-                    splits[i].StartDate.DayNumber,
-                    splits[i].EndDate?.DayNumber,
-                    splits[i].RecurrenceInterval
-                )
-            ];
+        for (var i = 0; i < splits.Length; i++) {
+            map[keys[i]] = [];
+            switch (splits[i].RecurrenceType) {
+                case RecurrenceType.Daily:
+                    map[keys[i]].Add(
+                        SequenceFactory.Create(
+                            splits[i].StartDate.DayNumber,
+                            splits[i].EndDate?.DayNumber,
+                            splits[i].RecurrenceInterval)
+                        );
+                    break;
+
+                case RecurrenceType.Weekly:
+                    if (splits[i].DaysOfWeek.Count == 0) break;
+                    
+                    foreach (var day in splits[i].DaysOfWeek)
+                    {
+                        var start = splits[i].StartDate.ToFirstDayOfWeek();
+                        while (start.DayOfWeek != day)
+                            start = start.AddDays(1);
+                    
+                        var sequence = SequenceFactory.Create(
+                            start.DayNumber,
+                            splits[i].EndDate?.DayNumber,
+                            splits[i].RecurrenceInterval * 7
+                        );
+                        if (sequence.Start < splits[i].StartDate.DayNumber)
+                            sequence = sequence.StartFromIndex(1);
+
+                        if (sequence.IsEmpty) continue;
+                
+                        map[keys[i]].Add(sequence);
+                    }
+                    break;
+                
+                default: throw new NotImplementedException();
+            }
         }
 
         return map;
@@ -109,20 +136,6 @@ public class Schedule {
 
     private Slot PeriodAfterMidnight() =>
         CrossesDayBoundary ? new Slot(end: EndTime) : new Slot(StartTime, EndTime);
-
-    public void EndAtMidNight() {
-        if (StartTime == TimeOnly.MaxValue)
-            throw new Exception("invalid state: cannot stretch end time when start time is max value");
-        
-        EndTime = TimeOnly.MaxValue;
-    }
-    
-    public void StartAtMidNight() {
-        if (EndTime == TimeOnly.MinValue)
-            throw new Exception("invalid state: cannot start at midnight when end time is min value");
-        
-        StartTime = TimeOnly.MinValue;
-    }
 }
 
 public enum RecurrenceType

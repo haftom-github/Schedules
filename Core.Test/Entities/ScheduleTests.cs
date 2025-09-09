@@ -1,11 +1,10 @@
 using Core.Entities;
-using Core.Options;
 
 namespace Core.Test.Entities;
 
 public class ScheduleTests {
 
-    private readonly DateOnly _today = TimeSettings.Today;
+    private readonly DateOnly _today = new DateOnly(2025, 9, 8);
     private readonly DateOnly _tomorrow;
     private readonly DateOnly _yesterday;
     private readonly DateOnly _afterTomorrow;
@@ -211,5 +210,66 @@ public class ScheduleTests {
         Assert.Equal(5, s.RecurrenceInterval);
         Assert.Empty(s.DaysOfWeek);
         Assert.Equal(RecurrenceType.Weekly, s.RecurrenceType);
+    }
+    
+    
+    // weekly recurrence tests. these tests assume first day of week is monday
+    [Fact]
+    public void ZeroSlots_WhenWeekly_AndDayNotInDaysOfWeek() 
+    {
+        var s = new Schedule(_today);
+        
+        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek]);
+        Assert.Empty(s.SlotsAtDate(_tomorrow)); 
+    }
+
+    [Fact]
+    public void TheLastDayWithInSchedule_ShouldHaveACorrectSlot() {
+        var s = new Schedule(_today, _today.AddDays(8));
+        s.UpdateRecurrence(type: RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek]);
+        Assert.NotEmpty(s.SlotsAtDate(_today.AddDays(7)));
+
+        s = new Schedule(_today, _today.AddDays(8), _fiveOClock, _twoOClock);
+        s.UpdateRecurrence(type: RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek]);
+        var slots = s.SlotsAtDate(_today.AddDays(8));
+        Assert.Single(slots);
+        Assert.Equal(TimeOnly.MinValue, slots[0].Start);
+        Assert.Equal(_twoOClock, slots[0].End);
+    }
+    
+    [Fact]
+    public void DayWithInSchedule_ShouldHaveACorrectSlot() {
+        var s = new Schedule(_today, _today.AddDays(15), _twoOClock, _fiveOClock);
+        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek, _tomorrow.DayOfWeek]);
+        
+        var slots = s.SlotsAtDate(_today.AddDays(7));
+        Assert.Single(slots);
+        Assert.Equal(_twoOClock, slots[0].Start);
+        Assert.Equal(_fiveOClock, slots[0].End);
+        
+        slots = s.SlotsAtDate(_today.AddDays(8));
+        Assert.Single(slots);
+        Assert.Equal(_twoOClock, slots[0].Start);
+        Assert.Equal(_fiveOClock, slots[0].End);
+        
+        s = new Schedule(_today, _today.AddDays(15), _fiveOClock, _twoOClock);
+        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek, _tomorrow.DayOfWeek]);
+        
+        slots = s.SlotsAtDate(_today.AddDays(7));
+        Assert.Single(slots);
+        Assert.Equal(_fiveOClock, slots[0].Start);
+        Assert.Equal(TimeOnly.MaxValue, slots[0].End);
+        
+        slots = s.SlotsAtDate(_today.AddDays(8));
+        Assert.Equal(2, slots.Count);
+        Assert.Equal(_fiveOClock, slots[0].Start);
+        Assert.Equal(TimeOnly.MaxValue, slots[0].End);
+        Assert.Equal(TimeOnly.MinValue, slots[1].Start);
+        Assert.Equal(_twoOClock, slots[1].End);
+        
+        slots = s.SlotsAtDate(_today.AddDays(9));
+        Assert.Single(slots);
+        Assert.Equal(TimeOnly.MinValue, slots[0].Start);
+        Assert.Equal(_twoOClock, slots[0].End);
     }
 }
