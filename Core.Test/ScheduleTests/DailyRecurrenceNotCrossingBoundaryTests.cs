@@ -2,7 +2,7 @@ using Core.Entities;
 
 namespace Core.Test.ScheduleTests;
 
-public class DailyRecurrenceTests {
+public class DailyRecurrenceNotCrossingBoundaryTests {
     private readonly DateOnly _today = new(2025, 9, 8);
     private readonly DateOnly _tomorrow;
     private readonly DateOnly _yesterday;
@@ -12,7 +12,7 @@ public class DailyRecurrenceTests {
     private readonly TimeOnly _fourOClock = new(4, 0);
     private readonly TimeOnly _fiveOClock = new(5, 0);
 
-    public DailyRecurrenceTests()
+    public DailyRecurrenceNotCrossingBoundaryTests()
     {
         _tomorrow = _today.AddDays(1);
         _yesterday = _today.AddDays(-1);
