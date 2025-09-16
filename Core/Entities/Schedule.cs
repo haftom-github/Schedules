@@ -1,113 +1,145 @@
-using Core.Enums;
-using Core.Overlap;
+using Core.Options;
+using Core.Sequences;
+using Core.ValueObjects;
 
 namespace Core.Entities;
 
 public class Schedule {
-    private readonly HashSet<DayOfWeek> _daysOfWeek = [];
-    
-    public TimeOnly StartTime { get; private set; }
-    public TimeOnly EndTime { get; private set; }
-    
-    public DateOnly StartDate { get; private set; }
-    public DateOnly? EndDate { get; private set; }
-    
+    public DateOnly StartDate { get; }
+    public DateOnly? EndDate { get; }
+    public TimeOnly StartTime { get; }
+    public TimeOnly EndTime { get; }
+
     public RecurrenceType RecurrenceType { get; private set; } = RecurrenceType.Daily;
-    
-    public IReadOnlySet<DayOfWeek> DaysOfWeek => _daysOfWeek;
     public int RecurrenceInterval { get; private set; } = 1;
+    public HashSet<DayOfWeek> DaysOfWeek { get; } = [];
 
-    public bool CrossesDayBoundary => EndTime < StartTime;
-    public Schedule(TimeOnly startTime, TimeOnly endTime, DateOnly startDate, DateOnly? endDate = null) {
+    public bool IsForever => EndDate is null;
+    public bool CrossesDayBoundary => StartTime > EndTime;
+
+    public  Schedule(DateOnly startDate, DateOnly? endDate = null, TimeOnly? startTime = null, TimeOnly? endTime = null) {
         
-        if (startTime == endTime)
-            throw new ArgumentException("end time can not be equal to start time", nameof(endTime));
+        if (startDate > endDate)
+            throw new ArgumentException("end of schedule should not come before its start");
         
-        if (endDate < startDate)
-            throw new ArgumentException("End date cannot be earlier than start date.", nameof(endDate));
-        
-        StartTime = startTime;
-        EndTime = endTime;
         StartDate = startDate;
         EndDate = endDate;
+        StartTime = startTime ?? TimeOnly.MinValue;
+        EndTime = endTime ?? TimeOnly.MaxValue;
+        
+        if (StartTime == EndTime)
+            throw new ArgumentException("start time and end time cannot be equal");
     }
 
-    public Schedule(Schedule schedule) {
-        StartTime = schedule.StartTime;
-        EndTime = schedule.EndTime;
+    public void UpdateRecurrence(RecurrenceType? type = null, int? interval = null, HashSet<DayOfWeek>? daysOfWeek = null) {
         
-        StartDate = schedule.StartDate;
-        EndDate = schedule.EndDate;
-        
-        RecurrenceType = schedule.RecurrenceType;
-        RecurrenceInterval = schedule.RecurrenceInterval;
-        _daysOfWeek = new HashSet<DayOfWeek>(schedule._daysOfWeek);
-    }
-    
-    public void RecurWeekly(List<DayOfWeek> daysOfWeek, int interval = 1) {
-        if (daysOfWeek == null || daysOfWeek.Count == 0)
-            throw new ArgumentException("Days of week cannot be null or empty.", nameof(daysOfWeek));
-        
-        if (interval <= 0) 
-            throw new ArgumentOutOfRangeException(nameof(interval), "Recurrence interval must be a positive integer.");
+        if (interval is not null)
+        {
+            if (interval <= 0)
+                throw new ArgumentException("recurrence interval must be positive");
 
-        _daysOfWeek.Clear();
-        _daysOfWeek.UnionWith(daysOfWeek.ToHashSet());
-        
-        RecurrenceType = RecurrenceType.Weekly;
-        RecurrenceInterval = interval;
-    }
-    
-    public void RecurDaily(int interval = 1) {
-        if (interval <= 0)
-            throw new ArgumentOutOfRangeException(nameof(interval), "Recurrence interval must be a positive integer.");
-        
-        RecurrenceType = RecurrenceType.Daily;
-        RecurrenceInterval = interval;
-    }
-    
-    public void UpdateRecurrenceInterval(int interval) {
-        if (interval <= 0)
-            throw new ArgumentOutOfRangeException(nameof(interval), "Recurrence interval must be a positive integer.");
-        
-        RecurrenceInterval = interval;
+            RecurrenceInterval = interval.Value;
+        }
+
+        if (type is not null)
+            RecurrenceType = type.Value;
+
+        if (daysOfWeek is null) return;
+        DaysOfWeek.Clear();
+        foreach (var day in daysOfWeek)
+            DaysOfWeek.Add(day);
     }
 
-    public void UpdateStartDate(DateOnly startDate) {
-        if (EndDate < startDate)
-            throw new ArgumentException("start date cannot be later than End date.", nameof(startDate));
-        
-        StartDate = startDate;
+    public List<Slot> SlotsAtDate(DateOnly date) 
+    {
+        var sequenceMap = ToSequencesMap();
+        var periods = new List<Slot>();
+
+        foreach (var (key, sequences) in sequenceMap) {
+            if (sequences.Any(sequence => sequence.IsMember(date.DayNumber))) {
+                periods.Add(key == "before"
+                    ? PeriodBeforeMidnight()
+                    : PeriodAfterMidnight());
+            }
+        }
+
+        return periods;
     }
 
-    public void UpdateEndDate(DateOnly? endDate) {
-        if (StartDate > endDate)
-            throw new ArgumentException("End date cannot be earlier than start date.", nameof(endDate));
-        
-        EndDate = endDate;
+    public Schedule[] SplitOnDayBoundary() 
+    {
+        if (!CrossesDayBoundary)
+            return [this];
+
+        var beforeMidnight = new Schedule(StartDate, EndDate, StartTime, TimeOnly.MaxValue);
+        beforeMidnight.UpdateRecurrence(type: RecurrenceType, daysOfWeek: DaysOfWeek, interval: RecurrenceInterval);
+
+        var afterMidnight = new Schedule(
+            StartDate.AddDays(1),
+            EndDate?.AddDays(1),
+            TimeOnly.MinValue, EndTime);
+
+        var shiftedDaysOfWeek = DaysOfWeek.Select(d => d.ToNextDayOfWeek()).ToHashSet();
+        afterMidnight.UpdateRecurrence(type: RecurrenceType, daysOfWeek: shiftedDaysOfWeek, interval: RecurrenceInterval);
+        return [beforeMidnight, afterMidnight];
     }
 
-    public void UpdateStartTime(TimeOnly startTime) {
-        if (EndTime == startTime)
-            throw new ArgumentException("start time can not be equal to end time", nameof(startTime));
-        
-        StartTime = startTime;
-    }
-    
-    public void UpdateEndTime(TimeOnly endTime) {
-        if (StartTime == endTime)
-            throw new ArgumentException("end time can not be equal to start time", nameof(endTime));
+    private Dictionary<string, List<ISequence>> ToSequencesMap() {
+        var splits = SplitOnDayBoundary();
+        var keys = new[] { "before", "after" };
+        var map = new Dictionary<string, List<ISequence>>();
 
-        EndTime = endTime;
+        for (var i = 0; i < splits.Length; i++) {
+            map[keys[i]] = [];
+            switch (splits[i].RecurrenceType) {
+                case RecurrenceType.Daily:
+                    map[keys[i]].Add(
+                        SequenceFactory.Create(
+                            splits[i].StartDate.DayNumber,
+                            splits[i].EndDate?.DayNumber,
+                            splits[i].RecurrenceInterval)
+                        );
+                    break;
+
+                case RecurrenceType.Weekly:
+                    if (splits[i].DaysOfWeek.Count == 0) break;
+                    
+                    foreach (var day in splits[i].DaysOfWeek)
+                    {
+                        var start = splits[i].StartDate.ToFirstDayOfWeek();
+                        while (start.DayOfWeek != day)
+                            start = start.AddDays(1);
+                    
+                        var sequence = SequenceFactory.Create(
+                            start.DayNumber,
+                            splits[i].EndDate?.DayNumber,
+                            splits[i].RecurrenceInterval * 7
+                        );
+                        if (sequence.Start < splits[i].StartDate.DayNumber)
+                            sequence = sequence.StartFromIndex(1);
+
+                        if (sequence.IsEmpty) continue;
+                
+                        map[keys[i]].Add(sequence);
+                    }
+                    break;
+                
+                default: throw new NotImplementedException();
+            }
+        }
+
+        return map;
     }
 
-    public void UpdateDaysOfWeek(List<DayOfWeek> daysOfWeek) {
-        _daysOfWeek.Clear();
-        _daysOfWeek.UnionWith(daysOfWeek.ToHashSet());
-    }
-    
-    public bool Overlaps(Schedule other) {
-        var overlapDetector = OverlapDetectorFactory.Create(RecurrenceType, other.RecurrenceType);
-        return overlapDetector.IsOverlapping(this, other);
-    }
+    private Slot PeriodBeforeMidnight() =>
+        CrossesDayBoundary ? new Slot(StartTime) : new Slot(StartTime, EndTime);
+
+    private Slot PeriodAfterMidnight() =>
+        CrossesDayBoundary ? new Slot(end: EndTime) : new Slot(StartTime, EndTime);
+}
+
+public enum RecurrenceType
+{
+    Daily,
+    Weekly
 }
