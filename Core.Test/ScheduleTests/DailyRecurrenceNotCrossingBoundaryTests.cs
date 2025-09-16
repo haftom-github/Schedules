@@ -64,4 +64,29 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         Assert.Equal(RecurrenceType.Daily, s.RecurrenceType);
         Assert.Equal(3, s.RecurrenceInterval);
     }
+
+    #region OverlapDetection
+
+    [Fact]
+    public void ShouldNotOverlap_WhenDateRangesDoNotOverlap() {
+        var s1 = new Schedule(_today, _tomorrow);
+        var s2 = new Schedule(_tomorrow.AddDays(2), _tomorrow.AddDays(3));
+        
+        var overlap = s1.OverlapScheduleWith(s2);
+        Assert.Null(overlap);
+    }
+
+    [Fact]
+    public void ShouldOverlap_WhenDateRangesOverlap_AndRecursDaily() {
+        var s1 = new Schedule(_today, _today);
+        s1.UpdateRecurrence(interval: 1);
+        
+        var s2 = new Schedule(_today, _tomorrow);
+        s2.UpdateRecurrence(interval: 1);
+        
+        var overlap = s1.OverlapScheduleWith(s2);
+        Assert.NotNull(overlap);
+    }
+
+    #endregion
 }

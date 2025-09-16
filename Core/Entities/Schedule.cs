@@ -136,6 +136,10 @@ public class Schedule {
 
     private Slot PeriodAfterMidnight() =>
         CrossesDayBoundary ? new Slot(end: EndTime) : new Slot(StartTime, EndTime);
+
+    public Schedule? OverlapScheduleWith(Schedule other) {
+        return null;
+    }
 }
 
 public enum RecurrenceType
