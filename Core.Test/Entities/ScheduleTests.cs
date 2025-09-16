@@ -213,7 +213,9 @@ public class ScheduleTests {
     }
     
     
-    // weekly recurrence tests. these tests assume first day of week is monday
+    #region WeeklyRecurrenceTests
+    
+    // these tests assume first day of week is monday
     [Fact]
     public void ZeroSlots_WhenWeekly_AndDayNotInDaysOfWeek() 
     {
@@ -224,52 +226,99 @@ public class ScheduleTests {
     }
 
     [Fact]
-    public void TheLastDayWithInSchedule_ShouldHaveACorrectSlot() {
+    public void TheLastDayWithInSchedule_ShouldHaveASlot_DoesNotCrossBoundary() {
         var s = new Schedule(_today, _today.AddDays(8));
         s.UpdateRecurrence(type: RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek]);
-        Assert.NotEmpty(s.SlotsAtDate(_today.AddDays(7)));
-
-        s = new Schedule(_today, _today.AddDays(8), _fiveOClock, _twoOClock);
+        Assert.Single(s.SlotsAtDate(_today.AddDays(7)));
+    }
+    
+    [Fact]
+    public void TheLastDayWithInSchedule_ShouldHaveASlot_CrossesBoundary() {
+        var s = new Schedule(_today, _today.AddDays(8), _fiveOClock, _twoOClock);
         s.UpdateRecurrence(type: RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek]);
+        
         var slots = s.SlotsAtDate(_today.AddDays(8));
+        
         Assert.Single(slots);
         Assert.Equal(TimeOnly.MinValue, slots[0].Start);
         Assert.Equal(_twoOClock, slots[0].End);
     }
-    
+
     [Fact]
-    public void DayWithInSchedule_ShouldHaveACorrectSlot() {
+    public void TheDayBeforeTheLastDayWithInSchedule_ShouldHaveTwoSlots_CrossesBoundary_AndConsecutiveScheduleDays() {
+        var s = new Schedule(_today, _today.AddDays(8), _fiveOClock, _twoOClock);
+        s.UpdateRecurrence(type: RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek, _tomorrow.DayOfWeek]);
+        
+        var slots = s.SlotsAtDate(_today.AddDays(8));
+        
+        Assert.Equal(2, slots.Count);
+        Assert.Equal(_fiveOClock, slots[0].Start);
+        Assert.Equal(TimeOnly.MaxValue, slots[0].End);
+        
+        Assert.Equal(TimeOnly.MinValue, slots[1].Start);
+        Assert.Equal(_twoOClock, slots[1].End);
+    }
+    
+    // general case
+    [Fact]
+    public void ADayWithInSchedule_ShouldHaveASlot_DoesNotCrossBoundary_ConsecutiveDaysStart() {
         var s = new Schedule(_today, _today.AddDays(15), _twoOClock, _fiveOClock);
         s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek, _tomorrow.DayOfWeek]);
         
         var slots = s.SlotsAtDate(_today.AddDays(7));
+        
         Assert.Single(slots);
         Assert.Equal(_twoOClock, slots[0].Start);
         Assert.Equal(_fiveOClock, slots[0].End);
+    }
+
+    [Fact]
+    public void ADayWithInSchedule_ShouldHaveASlot_DoesNotCrossBoundary_ConsecutiveDaysEnd() {
+        var s = new Schedule(_today, _today.AddDays(15), _twoOClock, _fiveOClock);
         
-        slots = s.SlotsAtDate(_today.AddDays(8));
+        var slots = s.SlotsAtDate(_today.AddDays(8));
+        
         Assert.Single(slots);
         Assert.Equal(_twoOClock, slots[0].Start);
         Assert.Equal(_fiveOClock, slots[0].End);
-        
-        s = new Schedule(_today, _today.AddDays(15), _fiveOClock, _twoOClock);
+    }
+
+    [Fact]
+    public void ADayWithInSchedule_ShouldHaveASlot_CrossBoundary_ConsecutiveDaysStart() {
+        var s = new Schedule(_today, _today.AddDays(15), _fiveOClock, _twoOClock);
         s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek, _tomorrow.DayOfWeek]);
         
-        slots = s.SlotsAtDate(_today.AddDays(7));
+        var slots = s.SlotsAtDate(_today.AddDays(7));
+        
         Assert.Single(slots);
         Assert.Equal(_fiveOClock, slots[0].Start);
         Assert.Equal(TimeOnly.MaxValue, slots[0].End);
+    }
+
+    [Fact]
+    public void ADayWithInSchedule_ShouldHaveASlot_CrossBoundary_ConsecutiveDaysEnd() {
+        var s = new Schedule(_today, _today.AddDays(15), _fiveOClock, _twoOClock);
+        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek, _tomorrow.DayOfWeek]);
         
-        slots = s.SlotsAtDate(_today.AddDays(8));
+        var slots = s.SlotsAtDate(_today.AddDays(8));
+        
         Assert.Equal(2, slots.Count);
         Assert.Equal(_fiveOClock, slots[0].Start);
         Assert.Equal(TimeOnly.MaxValue, slots[0].End);
         Assert.Equal(TimeOnly.MinValue, slots[1].Start);
         Assert.Equal(_twoOClock, slots[1].End);
+    }
+
+    [Fact]
+    public void TheDayAfterTheLastDayInDaysOfWeek_ShouldHaveASlot_CrossBoundary() {
+        var s = new Schedule(_today, _today.AddDays(15), _fiveOClock, _twoOClock);
+        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek, _tomorrow.DayOfWeek]);
         
-        slots = s.SlotsAtDate(_today.AddDays(9));
+        var slots = s.SlotsAtDate(_today.AddDays(9));
+        
         Assert.Single(slots);
         Assert.Equal(TimeOnly.MinValue, slots[0].Start);
         Assert.Equal(_twoOClock, slots[0].End);
     }
+    #endregion
 }
