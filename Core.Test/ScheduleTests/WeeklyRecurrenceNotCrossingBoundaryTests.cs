@@ -33,7 +33,7 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
     
     // these tests assume first day of week is monday
     [Fact]
-    public void ZeroSlots_WhenWeekly_AndDayNotInDaysOfWeek() 
+    public void ShouldHave_ZeroSlots_WhenDayOfWeekIsNotOnSchedule() 
     {
         var s = new Schedule(_today);
         
@@ -42,7 +42,7 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
     }
 
     [Fact]
-    public void TheLastDayWithInSchedule_ShouldHaveASlot_DoesNotCrossBoundary() {
+    public void TheLastDayWithInSchedule_ShouldHaveASlot() {
         var s = new Schedule(_today, _today.AddDays(8));
         s.UpdateRecurrence(type: RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek]);
         Assert.Single(s.SlotsAtDate(_today.AddDays(7)));
@@ -50,7 +50,7 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
     
     // general case
     [Fact]
-    public void ADayWithInSchedule_ShouldHaveASlot_DoesNotCrossBoundary_ConsecutiveDaysStart() {
+    public void ADayWithInSchedule_ShouldHaveASlot_ConsecutiveDaysStart() {
         var s = new Schedule(_today, _today.AddDays(15), _twoOClock, _fiveOClock);
         s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek, _tomorrow.DayOfWeek]);
         
@@ -62,7 +62,7 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
     }
 
     [Fact]
-    public void ADayWithInSchedule_ShouldHaveASlot_DoesNotCrossBoundary_ConsecutiveDaysEnd() {
+    public void ADayWithInSchedule_ShouldHaveASlot_ConsecutiveDaysEnd() {
         var s = new Schedule(_today, _today.AddDays(15), _twoOClock, _fiveOClock);
         
         var slots = s.SlotsAtDate(_today.AddDays(8));

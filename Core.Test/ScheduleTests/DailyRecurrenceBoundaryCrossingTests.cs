@@ -21,40 +21,47 @@ public class DailyRecurrenceBoundaryCrossingTests {
     }
     
     [Fact]
-    public void ShouldReturn_TwoPeriods()
+    public void AnyDayInTheMiddleOfTheSchedule_ShouldHaveTwoSlots_WhenIntervalIsOne()
     {
         var s = new Schedule(_today, null, _fourOClock, _twoOClock);
+        
         var periods = s.SlotsAtDate(_tomorrow);
         Assert.Equal(2, periods.Count);
     }
     
+    // an after midnight slot is a slot that starts at the beginning of the day and ends at the specified end time
+    // a before midnight slot is a slot that starts at the specified start time and ends at the end of the day
     [Fact]
-    public void SecondPeriod_ShouldMatchAfterMidnight()
+    public void SecondSlot_ShouldBeAnAfterMidnightSlot()
     {
         var s = new Schedule(_today, null, _threeOClock, _twoOClock);
+        
         var firstPeriod = s.SlotsAtDate(_tomorrow)[1];
+        
         Assert.Equal(TimeOnly.MinValue, firstPeriod.Start);
         Assert.Equal(_twoOClock, firstPeriod.End);
     }
     
     [Fact]
-    public void FirstPeriod_ShouldMatchBeforeMidnight()
+    public void SecondSlot_ShouldBeABeforeMidnightSlot()
     {
         var s = new Schedule(_today, null, _threeOClock, _twoOClock);
+        
         var secondPeriod = s.SlotsAtDate(_today)[0];
+        
         Assert.Equal(_threeOClock, secondPeriod.Start);
         Assert.Equal(TimeOnly.MaxValue, secondPeriod.End);
     }
     
     [Fact]
-    public void ThereCannotBeTwoPeriods()
+    public void TheFirstDayWithInSchedule_ShouldNotHaveTwoSlots()
     {
         var s = new Schedule(_today, startTime: _fiveOClock, endTime: _threeOClock);
         Assert.Single(s.SlotsAtDate(_today));
     }
     
     [Fact]
-    public void EvenDistanceFromStart_ShouldResultInPeriodBeforeMidnight_WhenRecurringEveryTwoDays()
+    public void DatesOnEvenDistanceFromStart_ShouldHaveASingleBeforeMidNightSlot_WhenRecurringEveryTwoDays()
     {
         var s = new Schedule(_yesterday, startTime: _fiveOClock, endTime: _fourOClock);
         s.UpdateRecurrence(interval: 2);
@@ -71,7 +78,7 @@ public class DailyRecurrenceBoundaryCrossingTests {
     }
     
     [Fact]
-    public void OddDistanceFromStart_ShouldResultInPeriodAfterMidnight_WhenRecurringEveryTwoDays()
+    public void DatesOnOddDistanceFromStart_ShouldHaveASingleAfterMidnightSot_WhenRecurringEveryTwoDays()
     {
         var s = new Schedule(_yesterday, startTime: _fiveOClock, endTime: _fourOClock);
         s.UpdateRecurrence(interval: 2);
