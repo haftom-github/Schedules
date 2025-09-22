@@ -93,4 +93,18 @@ public class DailyRecurrenceBoundaryCrossingTests {
         Assert.Equal(s.EndTime, periods[0].End);
         Assert.Equal(TimeOnly.MinValue, periods[0].Start);
     }
+    
+    # region OverlapDetection
+
+    [Fact]
+    public void TheOverlapShould_CrossBoundary() {
+        var s = new Schedule(_today, _today, _fourOClock, _threeOClock);
+        var other = new Schedule(_today, _today, _fourOClock, _threeOClock);
+
+        var overlap = s.OverlapScheduleWith(other);
+        Assert.NotNull(overlap);
+        Assert.True(overlap.CrossesDayBoundary);
+    }
+    
+    # endregion
 }

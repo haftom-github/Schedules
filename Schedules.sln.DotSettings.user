@@ -16,6 +16,7 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=34feca09_002Dddab_002D4304_002Daf4f_002Ddcee51eef79e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="OverlapsTimeRange_ShouldBe_TheOverlapOfTheTwoTimeRanges" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.ScheduleTests.DailyRecurrenceNotCrossingBoundaryTests&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.ScheduleTests.DailyRecurrenceBoundaryCrossingTests.TheOverlapShould_CrossBoundary&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	
