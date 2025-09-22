@@ -136,10 +136,29 @@ public class Schedule {
 
     private Slot PeriodAfterMidnight() =>
         CrossesDayBoundary ? new Slot(end: EndTime) : new Slot(StartTime, EndTime);
-
+    
     public Schedule? OverlapScheduleWith(Schedule other) {
-        return null;
+        if (StartTime >= other.EndTime || other.StartTime >= EndTime)
+            return null;
+        
+        var seq = ToSequencesMap()["before"][0];
+        var otherSeq = other.ToSequencesMap()["before"][0];
+
+        var overlapSeq = seq.FindOverlapWith(otherSeq);
+        if (overlapSeq == null || overlapSeq.IsEmpty) return null;
+
+        var startDate = DateOnly.FromDayNumber(overlapSeq.Start);
+        DateOnly? endDate = overlapSeq.End != null 
+            ? DateOnly.FromDayNumber(overlapSeq.End!.Value) 
+            : null;
+        
+        var overlap = new Schedule(startDate, endDate, Max(StartTime, other.StartTime), Min(EndTime, other.EndTime));
+        overlap.UpdateRecurrence(interval: overlapSeq.Interval);
+        return overlap;
     }
+    
+    private TimeOnly Max(TimeOnly t1, TimeOnly t2) => t1 > t2 ? t1 : t2;
+    private TimeOnly Min(TimeOnly t1, TimeOnly t2) => t1 < t2 ? t1 : t2;
 }
 
 public enum RecurrenceType

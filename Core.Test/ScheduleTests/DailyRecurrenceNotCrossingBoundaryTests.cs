@@ -9,6 +9,7 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
 
     private readonly TimeOnly _twoOClock = new(2, 0);
     private readonly TimeOnly _threeOClock = new(3, 0);
+    private readonly TimeOnly _fourOClock = new(4, 0);
 
     public DailyRecurrenceNotCrossingBoundaryTests()
     {
@@ -86,6 +87,73 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         
         var overlap = s1.OverlapScheduleWith(s2);
         Assert.NotNull(overlap);
+    }
+
+    [Fact]
+    public void ShouldNotOverlap_WhenTimeRangesDoNotOverlap() {
+        var s = new Schedule(_today, _today, _twoOClock, _threeOClock);
+        var other = new Schedule(_today, _today, _threeOClock, _fourOClock);
+
+        var overlap = s.OverlapScheduleWith(other);
+        Assert.Null(overlap);
+    }
+
+    [Fact]
+    public void TheOverlap_ShouldRecurOnIntervalOf_2Days_WhenTheFirstRecursDaily_AndTheOtherEveryTwoDays() {
+        var s = new Schedule(_today, _today);
+        var other = new Schedule(_today, _tomorrow);
+        other.UpdateRecurrence(interval: 2);
+
+        var overlap = s.OverlapScheduleWith(other);
+        Assert.NotNull(overlap);
+        Assert.Equal(2, overlap.RecurrenceInterval);
+    }
+
+    [Fact]
+    public void Overlap_ShouldRecurEvery6Days_WhenEachRecurEvery_2_And_3_Days() {
+        // *  .  *  .  *  .  *  .  *  .  *  .  *
+        // #  .  .  #  .  .  #  .  .  #  .  .  #
+        var s = new Schedule(_today, _today.AddDays(5));
+        s.UpdateRecurrence(interval: 2);
+        var other = new Schedule(_today, _today.AddDays(5));
+        other.UpdateRecurrence(interval: 3);
+
+        var overlap = s.OverlapScheduleWith(other);
+        Assert.NotNull(overlap);
+        Assert.Equal(6, overlap.RecurrenceInterval);
+    }
+
+    [Fact]
+    public void Overlap_ShouldRecur_AtTheSameDay_WhenTheTwoSchedulesHave_TheSameRecurrence() {
+        var s = new Schedule(_today, _today);
+        s.UpdateRecurrence(interval: 2);
+        var other = new Schedule(_today, _today);
+        other.UpdateRecurrence(interval: 2);
+        
+        var overlap = s.OverlapScheduleWith(other);
+        Assert.NotNull(overlap);
+        Assert.Equal(2, overlap.RecurrenceInterval);
+    }
+
+    [Fact]
+    public void OverlapsTimeRange_ShouldBe_TheOverlapOfTheTwoTimeRanges() {
+        var s = new Schedule(_today, _today, _twoOClock, _fourOClock);
+        var other = new Schedule(_today, _today, _threeOClock, _fourOClock);
+
+        var overlap = s.OverlapScheduleWith(other);
+        Assert.NotNull(overlap);
+        Assert.Equal(_threeOClock, overlap.StartTime);
+        Assert.Equal(_fourOClock, overlap.EndTime);
+    }
+
+    [Fact]
+    public void TwoNeverEndingSchedules_ShouldHaveNeverEndingOverlap() {
+        var s = new Schedule(_today);
+        var other = new Schedule(_tomorrow);
+
+        var overlap = s.OverlapScheduleWith(other);
+        Assert.NotNull(overlap);
+        Assert.True(overlap.IsForever);
     }
 
     #endregion
