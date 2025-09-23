@@ -12,6 +12,9 @@ public class DailyRecurrenceBoundaryCrossingTests {
     private readonly TimeOnly _threeOClock = new(3, 0);
     private readonly TimeOnly _fourOClock = new(4, 0);
     private readonly TimeOnly _fiveOClock = new(5, 0);
+    private readonly TimeOnly _sixOClock = new(6, 0);
+    private readonly TimeOnly _eightOClock = new(8, 0);
+    private readonly TimeOnly _nineOClock = new(9, 0);
 
     public DailyRecurrenceBoundaryCrossingTests()
     {
@@ -155,6 +158,27 @@ public class DailyRecurrenceBoundaryCrossingTests {
         Assert.Equal(_today.AddDays(4), overlap.EndDate);
         Assert.Equal(_fiveOClock, overlap.StartTime);
         Assert.Equal(_twoOClock, overlap.EndTime);
+    }
+
+    [Fact]
+    public void WhenOneSchedules_BeforeMidNightRangeOverlaps_WithTheOtherSchedulesAfterMidnightRange() {
+        // |...0....|...1....|...2....|...3....|...4....|...5....|
+        // |..######|#.......|..######|#.......|..######|#.......|
+        // |........|.......#|###.....|.......#|###.....|........|
+
+        var s = new Schedule(_today, _today.AddDays(4), _sixOClock, _twoOClock);
+        s.UpdateRecurrence(interval: 2);
+
+        var other = new Schedule(_tomorrow, _today.AddDays(4), _nineOClock, _eightOClock);
+        other.UpdateRecurrence(interval: 2);
+
+        var overlap = s.OverlapScheduleWith(other);
+        Assert.NotNull(overlap);
+        Assert.False(overlap.CrossesDayBoundary);
+        Assert.Equal(_today.AddDays(2), overlap.StartDate);
+        Assert.Equal(_today.AddDays(4), overlap.EndDate);
+        Assert.Equal(_sixOClock, overlap.StartTime);
+        Assert.Equal(_eightOClock, overlap.EndTime);
     }
     
     # endregion

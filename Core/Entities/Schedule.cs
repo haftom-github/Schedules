@@ -88,7 +88,7 @@ public class Schedule {
 
     private List<ISequence> ToSequencesList() {
         var splits = SplitOnDayBoundary();
-        var tags = new[] { "before", "after" };
+        string[] tags = ["before", "after"];
         List<ISequence> sequences = [];
 
         for (var i = 0; i < splits.Length; i++) {
