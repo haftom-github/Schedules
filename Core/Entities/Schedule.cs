@@ -52,12 +52,12 @@ public class Schedule {
 
     public List<Slot> SlotsAtDate(DateOnly date) 
     {
-        var sequenceMap = ToSequencesMap();
+        var sequences = ToSequencesList();
         var periods = new List<Slot>();
 
-        foreach (var (key, sequences) in sequenceMap) {
-            if (sequences.Any(sequence => sequence.IsMember(date.DayNumber))) {
-                periods.Add(key == "before"
+        foreach (var sequence in sequences) {
+            if (sequence.IsMember(date.DayNumber)) {
+                periods.Add(sequence.Tag == "before"
                     ? PeriodBeforeMidnight()
                     : PeriodAfterMidnight());
             }
@@ -84,20 +84,19 @@ public class Schedule {
         return [beforeMidnight, afterMidnight];
     }
 
-    private Dictionary<string, List<ISequence>> ToSequencesMap() {
+    private List<ISequence> ToSequencesList() {
         var splits = SplitOnDayBoundary();
-        var keys = new[] { "before", "after" };
-        var map = new Dictionary<string, List<ISequence>>();
+        var tags = new[] { "before", "after" };
+        List<ISequence> sequences = [];
 
         for (var i = 0; i < splits.Length; i++) {
-            map[keys[i]] = [];
             switch (splits[i].RecurrenceType) {
                 case RecurrenceType.Daily:
-                    map[keys[i]].Add(
+                    sequences.Add(
                         SequenceFactory.Create(
                             splits[i].StartDate.DayNumber,
                             splits[i].EndDate?.DayNumber,
-                            splits[i].RecurrenceInterval)
+                            splits[i].RecurrenceInterval, tags[i])
                         );
                     break;
 
@@ -113,14 +112,15 @@ public class Schedule {
                         var sequence = SequenceFactory.Create(
                             start.DayNumber,
                             splits[i].EndDate?.DayNumber,
-                            splits[i].RecurrenceInterval * 7
+                            splits[i].RecurrenceInterval * 7,
+                            tags[i]
                         );
                         if (sequence.Start < splits[i].StartDate.DayNumber)
                             sequence = sequence.StartFromIndex(1);
 
                         if (sequence.IsEmpty) continue;
                 
-                        map[keys[i]].Add(sequence);
+                        sequences.Add(sequence);
                     }
                     break;
                 
@@ -128,7 +128,7 @@ public class Schedule {
             }
         }
 
-        return map;
+        return sequences;
     }
 
     private Slot PeriodBeforeMidnight() =>
@@ -141,8 +141,8 @@ public class Schedule {
         if (StartTime >= other.EndTime || other.StartTime >= EndTime)
             return null;
         
-        var seq = ToSequencesMap()["before"][0];
-        var otherSeq = other.ToSequencesMap()["before"][0];
+        var seq = ToSequencesList()[0];
+        var otherSeq = other.ToSequencesList()[0];
 
         var overlapSeq = seq.FindOverlapWith(otherSeq);
         if (overlapSeq == null || overlapSeq.IsEmpty) return null;
