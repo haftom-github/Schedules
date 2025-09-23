@@ -3,7 +3,7 @@ namespace Core.ValueObjects;
 public sealed class Slot(TimeOnly? start = null, TimeOnly? end = null) : IEquatable<Slot> {
     public TimeOnly Start { get; } = start ?? TimeOnly.MinValue;
     public TimeOnly End { get; } = end ?? TimeOnly.MaxValue;
-    public TimeSpan Span => Start - End;
+    public TimeSpan Span => End - Start;
     public bool IsPositive =>  Start < End;
     public bool IsFullDay => Start == TimeOnly.MinValue && End == TimeOnly.MaxValue;
     
