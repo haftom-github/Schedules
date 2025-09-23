@@ -97,7 +97,10 @@ public class DailyRecurrenceBoundaryCrossingTests {
     # region OverlapDetection
 
     [Fact]
-    public void TheOverlapShould_CrossBoundary() {
+    public void TheOverlapShould_CrossBoundary_WhenOtherAlsoCrossesBoundary() {
+        
+        // ..##|###...##|###...##|###..
+        // ..##|###...##|###...##|###..
         var s = new Schedule(_today, _today, _fourOClock, _threeOClock);
         var other = new Schedule(_today, _today, _fourOClock, _threeOClock);
 

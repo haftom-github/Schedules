@@ -16,6 +16,8 @@ public class Schedule {
 
     public bool IsForever => EndDate is null;
     public bool CrossesDayBoundary => StartTime > EndTime;
+    private bool StartsAtMidnight => StartTime == TimeOnly.MinValue;
+    private bool EndsAtMidnight => EndTime == TimeOnly.MaxValue;
 
     public  Schedule(DateOnly startDate, DateOnly? endDate = null, TimeOnly? startTime = null, TimeOnly? endTime = null) {
         
@@ -138,25 +140,74 @@ public class Schedule {
         CrossesDayBoundary ? new Slot(end: EndTime) : new Slot(StartTime, EndTime);
     
     public Schedule? OverlapScheduleWith(Schedule other) {
-        if (StartTime >= other.EndTime || other.StartTime >= EndTime)
-            return null;
-        
-        var seq = ToSequencesList()[0];
-        var otherSeq = other.ToSequencesList()[0];
+        var ownSequences = ToSequencesList();
+        var otherSequences = other.ToSequencesList();
 
-        var overlapSeq = seq.FindOverlapWith(otherSeq);
-        if (overlapSeq == null || overlapSeq.IsEmpty) return null;
+        List<Schedule> overlapSchedules = [];
+        foreach(var ownSequence in  ownSequences) {
+            foreach (var otherSequence in otherSequences) {
+                var overlapSeq = ownSequence.FindOverlapWith(otherSequence);
+                if (overlapSeq is null || overlapSeq.IsEmpty)
+                    continue;
 
-        var startDate = DateOnly.FromDayNumber(overlapSeq.Start);
-        DateOnly? endDate = overlapSeq.End != null 
-            ? DateOnly.FromDayNumber(overlapSeq.End!.Value) 
-            : null;
-        
-        var overlap = new Schedule(startDate, endDate, Max(StartTime, other.StartTime), Min(EndTime, other.EndTime));
-        overlap.UpdateRecurrence(interval: overlapSeq.Interval);
-        return overlap;
+                var ownTimeRange = ownSequence.Tag == "before"
+                    ? PeriodBeforeMidnight() : PeriodAfterMidnight();
+                
+                var otherTimeRange = otherSequence.Tag == "before"
+                    ? other.PeriodBeforeMidnight() : other.PeriodAfterMidnight();
+
+                var commonRange = CommonRange(ownTimeRange, otherTimeRange);
+                if (!commonRange.IsPositive) continue;
+                var startDate = DateOnly.FromDayNumber(overlapSeq.Start);
+                DateOnly? endDate = overlapSeq.End != null 
+                    ? DateOnly.FromDayNumber(overlapSeq.End!.Value) 
+                    : null;
+                var overlapSchedule = new Schedule(startDate, endDate, commonRange.Start, commonRange.End);
+                overlapSchedule.UpdateRecurrence(interval: overlapSeq.Interval);
+                overlapSchedules.Add(overlapSchedule);
+            }
+        }
+
+        return overlapSchedules.Count == 0 ? null : Merge(overlapSchedules)[0];
     }
-    
+
+    private static List<Schedule> Merge(List<Schedule> schedules) {
+        for (var i = 0; i < schedules.Count; i++) {
+            
+            if (!schedules[i].StartsAtMidnight && !schedules[i].EndsAtMidnight) continue;
+            
+            for (var j = i + 1; j < schedules.Count; j++) {
+                var shift = schedules[i].FindShiftWith(schedules[j]);
+                if (shift is not 1) continue;
+                var newStartDate = schedules[i].StartDate;
+                var newEndDate = schedules[j].EndDate ?? schedules[i].EndDate?.AddDays(1);
+                var newStartTime = schedules[i].StartTime;
+                var newEndTime = schedules[j].EndTime;
+                var merged = new Schedule(newStartDate, newEndDate, newStartTime, newEndTime);
+                merged.UpdateRecurrence(interval: schedules[i].RecurrenceInterval);
+                schedules.RemoveAt(j);
+                schedules[i] = merged;
+                i--;
+                break;
+            }
+        }
+        
+        return schedules;
+    }
+
+    private int? FindShiftWith(Schedule other) {
+        if (RecurrenceInterval != other.RecurrenceInterval) return null;
+
+        var seq = ToSequencesList().First(s => s.Tag == "before");
+        var otherSeq = other.ToSequencesList().First(s => s.Tag == "before");
+        
+        var shift = (otherSeq.Start - seq.Start) / RecurrenceInterval;
+        return shift;
+    }
+
+    private Slot CommonRange(Slot slot1, Slot slot2) {
+        return new Slot(Max(slot1.Start, slot2.Start), Min(slot1.End, slot2.End));
+    }
     private TimeOnly Max(TimeOnly t1, TimeOnly t2) => t1 > t2 ? t1 : t2;
     private TimeOnly Min(TimeOnly t1, TimeOnly t2) => t1 < t2 ? t1 : t2;
 }
