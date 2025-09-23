@@ -180,7 +180,7 @@ public class Schedule {
                 var shift = schedules[i].FindShiftWith(schedules[j]);
                 if (shift is not 1) continue;
                 var newStartDate = schedules[i].StartDate;
-                var newEndDate = schedules[j].EndDate ?? schedules[i].EndDate?.AddDays(1);
+                var newEndDate = schedules[i].EndDate ?? schedules[j].EndDate?.AddDays(-1);
                 var newStartTime = schedules[i].StartTime;
                 var newEndTime = schedules[j].EndTime;
                 var merged = new Schedule(newStartDate, newEndDate, newStartTime, newEndTime);
@@ -200,8 +200,8 @@ public class Schedule {
 
         var seq = ToSequencesList().First(s => s.Tag == "before");
         var otherSeq = other.ToSequencesList().First(s => s.Tag == "before");
-        
-        var shift = (otherSeq.Start - seq.Start) / RecurrenceInterval;
+
+        var shift = otherSeq.Start - seq.Start;
         return shift;
     }
 

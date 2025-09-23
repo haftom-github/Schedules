@@ -109,5 +109,53 @@ public class DailyRecurrenceBoundaryCrossingTests {
         Assert.True(overlap.CrossesDayBoundary);
     }
     
+    [Fact]
+    public void TheOverlapShould_ShouldNotCrossBoundary_WhenOtherDoesNotCrossBoundary() {
+        
+        // .###|##...###|##...###|##..
+        // ....|.#......|.#......|.#..
+        var s = new Schedule(_today, _today, _fourOClock, _threeOClock);
+        var other = new Schedule(_tomorrow, _afterTomorrow, _twoOClock, _threeOClock);
+
+        var overlap = s.OverlapScheduleWith(other);
+        Assert.NotNull(overlap);
+        Assert.False(overlap.CrossesDayBoundary);
+    }
+
+    [Fact]
+    public void TheStartOfTheOverlap_WhenTheFirstScheduleStartsAfterTheOther() {
+        // |........|......##|####..##|####..
+        // |..##....|..##....|..##....|..##..
+        var s = new Schedule(_tomorrow, _afterTomorrow, _fourOClock, _threeOClock);
+        var other = new Schedule(_today, _afterTomorrow, _twoOClock, _threeOClock);
+        
+        var overlap = s.OverlapScheduleWith(other);
+        
+        Assert.NotNull(overlap);
+        Assert.Equal(_afterTomorrow, overlap.StartDate);
+        Assert.Equal(_afterTomorrow, overlap.EndDate);
+        Assert.Equal(_twoOClock, overlap.StartTime);
+        Assert.Equal(_threeOClock, overlap.EndTime);
+    }
+
+    [Fact]
+    public void BothCrossingBoundary_WithDifferentIntervals() {
+        // |...0....|...1....|...2....|...3....|...4....|...5....|
+        // |......##|####....|......##|####....|......##|####....|
+        // |........|.......#|#.......|........|.......#|#.......|
+        var other = new Schedule(_today, _today.AddDays(4), _fourOClock, _threeOClock);
+        other.UpdateRecurrence(interval: 2);
+        var s = new Schedule(_tomorrow, _today.AddDays(4), _fiveOClock, _twoOClock);
+        s.UpdateRecurrence(interval: 3);
+        
+        var overlap = s.OverlapScheduleWith(other);
+        Assert.NotNull(overlap);
+        Assert.True(overlap.CrossesDayBoundary);
+        Assert.Equal(_today.AddDays(4), overlap.StartDate);
+        Assert.Equal(_today.AddDays(4), overlap.EndDate);
+        Assert.Equal(_fiveOClock, overlap.StartTime);
+        Assert.Equal(_twoOClock, overlap.EndTime);
+    }
+    
     # endregion
 }
