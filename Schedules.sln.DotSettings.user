@@ -26,6 +26,7 @@
       &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.ScheduleTests.WeeklyRecurrenceNotCrossingBoundaryTests.When_DifferentIntervals&lt;/TestId&gt;&#xD;
       &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.ScheduleTests.WeeklyRecurrenceBoundaryCrossingTests.ShouldCrossBoundary_WhenBothCrossBoundary&lt;/TestId&gt;&#xD;
       &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.ScheduleTests.WeeklyRecurrenceBoundaryCrossingTests.WhenThereAreMultipleOverlaps&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.Services.SlotServiceTests&lt;/TestId&gt;&#xD;
     &lt;/TestAncestor&gt;&#xD;
     &lt;ProjectFolder&gt;7CA57A64-20AB-4365-976F-B83E699BB6CA/d:ScheduleTests&lt;/ProjectFolder&gt;&#xD;
   &lt;/Or&gt;&#xD;
