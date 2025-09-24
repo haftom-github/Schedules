@@ -7,13 +7,16 @@ public class InfiniteSequence : ISequence {
     public bool IsFinite => false;
     public int? Length => null;
     public bool IsEmpty => false;
+    
+    public string? Tag { get; }
 
-    public InfiniteSequence(int start, int interval = 1) {
+    public InfiniteSequence(int start, int interval = 1, string? tag = null) {
         if (interval <= 0)
             throw new ArgumentOutOfRangeException(nameof(interval), "interval must be a positive integer.");
         
         Start = start;
         Interval = interval;
+        Tag = tag;
     }
 
     public int S(int n) {

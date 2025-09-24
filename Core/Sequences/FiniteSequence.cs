@@ -7,14 +7,16 @@ public class FiniteSequence : ISequence {
     public bool IsFinite => true;
     public int? Length => SequenceMath.Floor(End!.Value - Start, Interval) + 1;
     public bool IsEmpty => Length < 1;
+    public string? Tag { get; }
 
-    public FiniteSequence(int start, int end, int interval = 1) {
+    public FiniteSequence(int start, int end, int interval = 1, string? tag = null) {
         if (interval <= 0)
             throw new ArgumentOutOfRangeException(nameof(interval), "Interval must be a positive integer.");
 
         Start = start;
         End = end;
         Interval = interval;
+        Tag = tag;
     }
     
     public int S(int n) {

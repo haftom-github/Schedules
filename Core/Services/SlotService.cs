@@ -1,4 +1,3 @@
-using Core.Entities;
 using Core.Options;
 using Core.Sequences;
 using Core.ValueObjects;
@@ -7,7 +6,7 @@ namespace Core.Services;
 
 public static class SlotService {
     public static List<Slot> GenerateSlots(
-        TimeSpan slotSpan, DateOnly date, List<WorkSchedule> workSchedules, List<BlockedSchedule> blockedSchedules) {
+        TimeSpan slotSpan, DateOnly date, List<Schedule> workSchedules, List<Schedule> blockedSchedules) {
         
         List<Slot> workingSlots = [];
         List<Slot> blockedSlots = [];
@@ -65,31 +64,6 @@ public static class SlotService {
         if (!org.IsPositive) (org, biProd) = (biProd, org);
         if (!biProd.IsPositive) biProd = null;
         return (org, biProd);
-    }
-
-    private static List<ISequence> ToSequenceList(Schedule schedule) {
-        switch (schedule.RecurrenceType) {
-            case RecurrenceType.Daily:
-                return [
-                    SequenceFactory.Create(schedule.StartDate.DayNumber, schedule.EndDate?.DayNumber,
-                        schedule.RecurrenceInterval)
-                ];
-            
-            case RecurrenceType.Weekly:
-                List<ISequence> sequences = [];
-                var start = schedule.StartDate.ToFirstDayOfWeek();
-                foreach (var day in schedule.DaysOfWeek) {
-                    while (start.DayOfWeek != day) start = start.AddDays(1);
-                    var sequence = SequenceFactory.Create(start.DayNumber, schedule.EndDate?.DayNumber, schedule.RecurrenceInterval*7);
-                    if (sequence.Start < schedule.StartDate.DayNumber) sequence = sequence.StartFromIndex(1);
-                    if (sequence != null)
-                        sequences.Add(sequence);
-                }
-                return sequences;
-            
-            default:
-                throw new NotImplementedException();
-        }
     }
     
     private static TimeOnly Min(TimeOnly a, TimeOnly b) => a < b ? a : b;

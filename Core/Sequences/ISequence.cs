@@ -12,4 +12,5 @@ public interface ISequence : IEquatable<ISequence> {
     public ISequence StartFromIndex(int n);
     public bool IsMember(int x);
     public ISequence CollapseToRangeOf(ISequence other);
+    public string? Tag { get; }
 }
