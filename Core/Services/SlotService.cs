@@ -17,12 +17,12 @@ public static class SlotService {
             blockedSlots.AddRange(slots);
         }
 
-        var availableSlots = Generate(slotSpan, workingSlots, blockedSlots);
+        var availableSlots = GenerateInternal(slotSpan, workingSlots, blockedSlots);
 
         return availableSlots;
     }
 
-    private static List<Slot> Generate(TimeSpan minSpan, List<Slot> working, List<Slot> blocking) {
+    private static List<Slot> GenerateInternal(TimeSpan minSpan, List<Slot> working, List<Slot> blocking) {
         for (var i = 0; i < working.Count; i++) {
             foreach (var slot in blocking) {
                 if (!working[i].IsPositive) break;

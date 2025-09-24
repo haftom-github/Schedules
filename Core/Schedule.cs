@@ -18,7 +18,7 @@ public class Schedule {
     private bool StartsAtMidnight => StartTime == TimeOnly.MinValue;
     private bool EndsAtMidnight => EndTime == TimeOnly.MaxValue;
 
-    public  Schedule(DateOnly startDate, DateOnly? endDate = null, TimeOnly? startTime = null, TimeOnly? endTime = null) {
+    public Schedule(DateOnly startDate, DateOnly? endDate = null, TimeOnly? startTime = null, TimeOnly? endTime = null) {
         
         if (startDate > endDate)
             throw new ArgumentException("end of schedule should not come before its start");
@@ -67,6 +67,42 @@ public class Schedule {
         return periods;
     }
 
+    public bool OverlapsWith(Schedule other) {
+        return OverlapScheduleWith(other).Count != 0;
+    }
+
+    public List<Schedule> OverlapScheduleWith(Schedule other) {
+        var ownSequences = ToSequencesList();
+        var otherSequences = other.ToSequencesList();
+
+        List<Schedule> overlapSchedules = [];
+        foreach(var ownSequence in  ownSequences) {
+            foreach (var otherSequence in otherSequences) {
+                var overlapSeq = ownSequence.FindOverlapWith(otherSequence);
+                if (overlapSeq is null || overlapSeq.IsEmpty)
+                    continue;
+
+                var ownTimeRange = ownSequence.Tag == "before"
+                    ? PeriodBeforeMidnight() : PeriodAfterMidnight();
+                
+                var otherTimeRange = otherSequence.Tag == "before"
+                    ? other.PeriodBeforeMidnight() : other.PeriodAfterMidnight();
+
+                var commonRange = CommonRange(ownTimeRange, otherTimeRange);
+                if (!commonRange.IsPositive) continue;
+                var startDate = DateOnly.FromDayNumber(overlapSeq.Start);
+                DateOnly? endDate = overlapSeq.End != null 
+                    ? DateOnly.FromDayNumber(overlapSeq.End!.Value) 
+                    : null;
+                var overlapSchedule = new Schedule(startDate, endDate, commonRange.Start, commonRange.End);
+                overlapSchedule.UpdateRecurrence(interval: overlapSeq.Interval);
+                overlapSchedules.Add(overlapSchedule);
+            }
+        }
+
+        return Merge(overlapSchedules);
+    }
+    
     private Schedule[] SplitOnDayBoundary() 
     {
         if (!CrossesDayBoundary)
@@ -137,38 +173,6 @@ public class Schedule {
 
     private Slot PeriodAfterMidnight() =>
         CrossesDayBoundary ? new Slot(end: EndTime) : new Slot(StartTime, EndTime);
-    
-    public List<Schedule> OverlapScheduleWith(Schedule other) {
-        var ownSequences = ToSequencesList();
-        var otherSequences = other.ToSequencesList();
-
-        List<Schedule> overlapSchedules = [];
-        foreach(var ownSequence in  ownSequences) {
-            foreach (var otherSequence in otherSequences) {
-                var overlapSeq = ownSequence.FindOverlapWith(otherSequence);
-                if (overlapSeq is null || overlapSeq.IsEmpty)
-                    continue;
-
-                var ownTimeRange = ownSequence.Tag == "before"
-                    ? PeriodBeforeMidnight() : PeriodAfterMidnight();
-                
-                var otherTimeRange = otherSequence.Tag == "before"
-                    ? other.PeriodBeforeMidnight() : other.PeriodAfterMidnight();
-
-                var commonRange = CommonRange(ownTimeRange, otherTimeRange);
-                if (!commonRange.IsPositive) continue;
-                var startDate = DateOnly.FromDayNumber(overlapSeq.Start);
-                DateOnly? endDate = overlapSeq.End != null 
-                    ? DateOnly.FromDayNumber(overlapSeq.End!.Value) 
-                    : null;
-                var overlapSchedule = new Schedule(startDate, endDate, commonRange.Start, commonRange.End);
-                overlapSchedule.UpdateRecurrence(interval: overlapSeq.Interval);
-                overlapSchedules.Add(overlapSchedule);
-            }
-        }
-
-        return Merge(overlapSchedules);
-    }
 
     private static List<Schedule> Merge(List<Schedule> schedules) {
         for (var i = 0; i < schedules.Count; i++) {
