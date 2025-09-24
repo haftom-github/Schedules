@@ -174,24 +174,36 @@ public class Schedule {
     private static List<Schedule> Merge(List<Schedule> schedules) {
         for (var i = 0; i < schedules.Count; i++) {
             
-            if (!schedules[i].StartsAtMidnight && !schedules[i].EndsAtMidnight) continue;
-            
             for (var j = i + 1; j < schedules.Count; j++) {
                 var shift = schedules[i].FindShiftWith(schedules[j]);
                 if (shift is not 1) continue;
+                if (!(schedules[i].EndsAtMidnight && schedules[j].StartsAtMidnight)) continue;
                 var newStartDate = schedules[i].StartDate;
-                var newEndDate = schedules[i].EndDate ?? schedules[j].EndDate?.AddDays(-1);
+                var newEndDate = schedules[i].EndDate;
                 var newStartTime = schedules[i].StartTime;
                 var newEndTime = schedules[j].EndTime;
                 var merged = new Schedule(newStartDate, newEndDate, newStartTime, newEndTime);
                 merged.UpdateRecurrence(interval: schedules[i].RecurrenceInterval);
                 schedules.RemoveAt(j);
                 schedules[i] = merged;
-                i--;
                 break;
             }
         }
-        
+
+        for (var i = 0; i < schedules.Count; i++) {
+            if (schedules[i].RecurrenceInterval % 7 != 0) continue;
+            var weeklyRecurrenceInterval = schedules[i].RecurrenceInterval / 7;
+            schedules[i].UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [schedules[i].StartDate.DayOfWeek], interval: weeklyRecurrenceInterval);
+            for (var j = i + 1; j < schedules.Count; j++) {
+                if (schedules[j].RecurrenceInterval 
+                    != schedules[i].RecurrenceInterval * 7) continue;
+                
+                schedules[i].DaysOfWeek.Add(schedules[j].StartDate.DayOfWeek);
+                schedules.RemoveAt(j);
+                j--;
+            }
+        }
+
         return schedules;
     }
 
@@ -201,7 +213,13 @@ public class Schedule {
         var seq = ToSequencesList().First(s => s.Tag == "before");
         var otherSeq = other.ToSequencesList().First(s => s.Tag == "before");
 
+        if (seq.IsFinite != otherSeq.IsFinite) return null;
+        
         var shift = otherSeq.Start - seq.Start;
+        if (otherSeq.End is null) return shift;
+        if (otherSeq.End - seq.End != shift)
+            return null;
+        
         return shift;
     }
 
