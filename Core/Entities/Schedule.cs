@@ -198,6 +198,10 @@ public class Schedule {
                 if (schedules[j].RecurrenceInterval 
                     != schedules[i].RecurrenceInterval * 7) continue;
                 
+                if (schedules[j].StartTime != schedules[i].StartTime
+                    || schedules[j].EndTime != schedules[i].EndTime)
+                    continue;
+                
                 schedules[i].DaysOfWeek.Add(schedules[j].StartDate.DayOfWeek);
                 schedules.RemoveAt(j);
                 j--;
