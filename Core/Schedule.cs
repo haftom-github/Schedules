@@ -2,7 +2,7 @@ using Core.Options;
 using Core.Sequences;
 using Core.ValueObjects;
 
-namespace Core.Entities;
+namespace Core;
 
 public class Schedule {
     public DateOnly StartDate { get; }

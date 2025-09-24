@@ -1,4 +1,3 @@
-using Core.Entities;
 using Core.Services;
 using TimeOnly = System.TimeOnly;
 
@@ -25,7 +24,7 @@ public class SlotServiceTests {
         _lastMonth = _today.AddDays(-30);
         _officeHours = new Schedule(_lastMonth, startTime:_2OClock, endTime:_11OClock);
         _nightShift = new Schedule(_lastMonth, startTime:_11OClock, endTime:oneOClock);
-        _weekend = new Schedule(_lastMonth, null, null);
+        _weekend = new Schedule(_lastMonth);
         _weekend.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Sunday, DayOfWeek.Saturday]);
         var lunchStart = new TimeOnly(10, 0);
         var lunchEnd = new TimeOnly(11, 0);

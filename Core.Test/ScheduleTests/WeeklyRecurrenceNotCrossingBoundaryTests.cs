@@ -1,5 +1,3 @@
-using Core.Entities;
-
 namespace Core.Test.ScheduleTests;
 
 public class WeeklyRecurrenceNotCrossingBoundaryTests {
