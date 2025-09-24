@@ -1,3 +1,5 @@
+using Core.Services;
+
 namespace Core.Test.ScheduleTests;
 
 public class WeeklyRecurrenceBoundaryCrossingTests {
