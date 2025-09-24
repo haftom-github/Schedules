@@ -97,11 +97,11 @@ public class WeeklyRecurrenceBoundaryCrossingTests {
         var other = new Schedule(_today, startTime: _fourOClock, endTime: _oneOClock);
         other.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Monday, DayOfWeek.Wednesday]);
         
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.NotNull(overlap);
-        Assert.True(overlap.CrossesDayBoundary);
-        Assert.Equal(RecurrenceType.Weekly, overlap.RecurrenceType);
-        Assert.Equal(2, overlap.DaysOfWeek.Count);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Single(overlaps);
+        Assert.True(overlaps[0].CrossesDayBoundary);
+        Assert.Equal(RecurrenceType.Weekly, overlaps[0].RecurrenceType);
+        Assert.Equal(2, overlaps[0].DaysOfWeek.Count);
     }
     
     [Fact]
@@ -116,11 +116,16 @@ public class WeeklyRecurrenceBoundaryCrossingTests {
         var other = new Schedule(_today, startTime: _fourOClock, endTime: _oneOClock);
         other.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Monday, DayOfWeek.Tuesday]);
         
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.NotNull(overlap);
-        Assert.True(overlap.CrossesDayBoundary);
-        Assert.Equal(RecurrenceType.Weekly, overlap.RecurrenceType);
-        Assert.Equal(2, overlap.DaysOfWeek.Count);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Equal(2, overlaps.Count);
+        Assert.True(overlaps[0].CrossesDayBoundary);
+        Assert.Equal(RecurrenceType.Weekly, overlaps[0].RecurrenceType);
+        Assert.Equal(2, overlaps[0].DaysOfWeek.Count);
+        
+        Assert.False(overlaps[1].CrossesDayBoundary);
+        Assert.Equal(RecurrenceType.Weekly, overlaps[1].RecurrenceType);
+        Assert.Single(overlaps[1].DaysOfWeek);
+        Assert.Contains(DayOfWeek.Tuesday, overlaps[1].DaysOfWeek);
     }
 
     #endregion

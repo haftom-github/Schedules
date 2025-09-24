@@ -88,9 +88,9 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
         var other = new Schedule(_today, _today.AddDays(8), _fourOClock, _fiveOClock);
         other.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Monday]);
         
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.NotNull(overlap);
-        Assert.Equal(RecurrenceType.Weekly, overlap.RecurrenceType);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Single(overlaps);
+        Assert.Equal(RecurrenceType.Weekly, overlaps[0].RecurrenceType);
     }
 
     [Fact]
@@ -106,12 +106,12 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
         var other = new Schedule(_today, startTime:_fourOClock, endTime:_fiveOClock);
         other.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Thursday]);
         
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.NotNull(overlap);
-        Assert.Equal(RecurrenceType.Weekly, overlap.RecurrenceType);
-        Assert.Equal(2, overlap.DaysOfWeek.Count);
-        Assert.Contains(DayOfWeek.Monday, overlap.DaysOfWeek);
-        Assert.Contains(DayOfWeek.Wednesday, overlap.DaysOfWeek);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Single(overlaps);
+        Assert.Equal(RecurrenceType.Weekly, overlaps[0].RecurrenceType);
+        Assert.Equal(2, overlaps[0].DaysOfWeek.Count);
+        Assert.Contains(DayOfWeek.Monday, overlaps[0].DaysOfWeek);
+        Assert.Contains(DayOfWeek.Wednesday, overlaps[0].DaysOfWeek);
     }
 
     [Fact]
@@ -126,12 +126,12 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
         var other = new Schedule(_today, startTime: _twoOClock, endTime: _fiveOClock);
         other.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek:[DayOfWeek.Monday], interval:3);
         
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.NotNull(overlap);
-        Assert.Equal(RecurrenceType.Weekly, overlap.RecurrenceType);
-        Assert.Single(overlap.DaysOfWeek);
-        Assert.Contains(DayOfWeek.Monday, overlap.DaysOfWeek);
-        Assert.Equal(6, overlap.RecurrenceInterval);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Single(overlaps);
+        Assert.Equal(RecurrenceType.Weekly, overlaps[0].RecurrenceType);
+        Assert.Single(overlaps[0].DaysOfWeek);
+        Assert.Contains(DayOfWeek.Monday, overlaps[0].DaysOfWeek);
+        Assert.Equal(6, overlaps[0].RecurrenceInterval);
     }
 
     #endregion

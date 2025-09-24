@@ -139,7 +139,7 @@ public class Schedule {
     private Slot PeriodAfterMidnight() =>
         CrossesDayBoundary ? new Slot(end: EndTime) : new Slot(StartTime, EndTime);
     
-    public Schedule? OverlapScheduleWith(Schedule other) {
+    public List<Schedule> OverlapScheduleWith(Schedule other) {
         var ownSequences = ToSequencesList();
         var otherSequences = other.ToSequencesList();
 
@@ -168,7 +168,7 @@ public class Schedule {
             }
         }
 
-        return overlapSchedules.Count == 0 ? null : Merge(overlapSchedules)[0];
+        return Merge(overlapSchedules);
     }
 
     private static List<Schedule> Merge(List<Schedule> schedules) {

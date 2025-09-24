@@ -73,8 +73,8 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         var s1 = new Schedule(_today, _tomorrow);
         var s2 = new Schedule(_tomorrow.AddDays(2), _tomorrow.AddDays(3));
         
-        var overlap = s1.OverlapScheduleWith(s2);
-        Assert.Null(overlap);
+        var overlaps = s1.OverlapScheduleWith(s2);
+        Assert.Empty(overlaps);
     }
 
     [Fact]
@@ -85,8 +85,8 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         var s2 = new Schedule(_today, _tomorrow);
         s2.UpdateRecurrence(interval: 1);
         
-        var overlap = s1.OverlapScheduleWith(s2);
-        Assert.NotNull(overlap);
+        var overlaps = s1.OverlapScheduleWith(s2);
+        Assert.Single(overlaps);
     }
 
     [Fact]
@@ -94,8 +94,8 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         var s = new Schedule(_today, _today, _twoOClock, _threeOClock);
         var other = new Schedule(_today, _today, _threeOClock, _fourOClock);
 
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.Null(overlap);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Empty(overlaps);
     }
 
     [Fact]
@@ -104,9 +104,9 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         var other = new Schedule(_today, _tomorrow);
         other.UpdateRecurrence(interval: 2);
 
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.NotNull(overlap);
-        Assert.Equal(2, overlap.RecurrenceInterval);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Single(overlaps);
+        Assert.Equal(2, overlaps[0].RecurrenceInterval);
     }
 
     [Fact]
@@ -118,9 +118,9 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         var other = new Schedule(_today, _today.AddDays(5));
         other.UpdateRecurrence(interval: 3);
 
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.NotNull(overlap);
-        Assert.Equal(6, overlap.RecurrenceInterval);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Single(overlaps);
+        Assert.Equal(6, overlaps[0].RecurrenceInterval);
     }
 
     [Fact]
@@ -130,9 +130,9 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         var other = new Schedule(_today, _today);
         other.UpdateRecurrence(interval: 2);
         
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.NotNull(overlap);
-        Assert.Equal(2, overlap.RecurrenceInterval);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Single(overlaps);
+        Assert.Equal(2, overlaps[0].RecurrenceInterval);
     }
 
     [Fact]
@@ -140,10 +140,10 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         var s = new Schedule(_today, _today, _twoOClock, _fourOClock);
         var other = new Schedule(_today, _today, _threeOClock, _fourOClock);
 
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.NotNull(overlap);
-        Assert.Equal(_threeOClock, overlap.StartTime);
-        Assert.Equal(_fourOClock, overlap.EndTime);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Single(overlaps);
+        Assert.Equal(_threeOClock, overlaps[0].StartTime);
+        Assert.Equal(_fourOClock, overlaps[0].EndTime);
     }
 
     [Fact]
@@ -151,9 +151,9 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         var s = new Schedule(_today);
         var other = new Schedule(_tomorrow);
 
-        var overlap = s.OverlapScheduleWith(other);
-        Assert.NotNull(overlap);
-        Assert.True(overlap.IsForever);
+        var overlaps = s.OverlapScheduleWith(other);
+        Assert.Single(overlaps);
+        Assert.True(overlaps[0].IsForever);
     }
 
     #endregion
