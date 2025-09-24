@@ -3,8 +3,8 @@ namespace Core.Options;
 public static class TimeSettings {
     public static DateTime Now => DateTime.UtcNow;
     public static DateOnly Today => DateOnly.FromDateTime(Now);
-    
-    public static DayOfWeek FirstDayOfWeek => DayOfWeek.Monday;
+
+    private static DayOfWeek FirstDayOfWeek => DayOfWeek.Monday;
 
     public static DateOnly ToFirstDayOfWeek(this DateOnly date) {
         var firstDayOfWeek = date.AddDays(0);

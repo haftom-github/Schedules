@@ -1,6 +1,5 @@
 using Core.Options;
 using Core.Sequences;
-using Core.ValueObjects;
 
 namespace Core;
 
@@ -68,7 +67,7 @@ public class Schedule {
         return periods;
     }
 
-    public Schedule[] SplitOnDayBoundary() 
+    private Schedule[] SplitOnDayBoundary() 
     {
         if (!CrossesDayBoundary)
             return [this];

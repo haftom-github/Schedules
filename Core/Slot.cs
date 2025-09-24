@@ -1,4 +1,4 @@
-namespace Core.ValueObjects;
+namespace Core;
 
 public sealed class Slot(TimeOnly? start = null, TimeOnly? end = null) : IEquatable<Slot> {
     public TimeOnly Start { get; } = start ?? TimeOnly.MinValue;
