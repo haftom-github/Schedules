@@ -41,8 +41,8 @@ public class DailyRecurrenceBoundaryCrossingTests {
         
         var firstPeriod = s.SlotsAtDate(_tomorrow)[1];
         
-        Assert.Equal(TimeOnly.MinValue, firstPeriod.Start);
-        Assert.Equal(_twoOClock, firstPeriod.End);
+        Assert.Equal(TimeOnly.MinValue, firstPeriod.StartTime);
+        Assert.Equal(_twoOClock, firstPeriod.EndTime);
     }
     
     [Fact]
@@ -52,8 +52,8 @@ public class DailyRecurrenceBoundaryCrossingTests {
         
         var secondPeriod = s.SlotsAtDate(_today)[0];
         
-        Assert.Equal(_threeOClock, secondPeriod.Start);
-        Assert.Equal(TimeOnly.MaxValue, secondPeriod.End);
+        Assert.Equal(_threeOClock, secondPeriod.StartTime);
+        Assert.Equal(TimeOnly.MinValue, secondPeriod.EndTime);
     }
     
     [Fact]
@@ -71,13 +71,13 @@ public class DailyRecurrenceBoundaryCrossingTests {
 
         var periods = s.SlotsAtDate(_yesterday);
         Assert.Single(periods);
-        Assert.Equal(TimeOnly.MaxValue, periods[0].End);
-        Assert.Equal(s.StartTime, periods[0].Start);
+        Assert.Equal(TimeOnly.MinValue, periods[0].EndTime);
+        Assert.Equal(s.StartTime, periods[0].StartTime);
 
         periods = s.SlotsAtDate(_tomorrow);
         Assert.Single(periods);
-        Assert.Equal(TimeOnly.MaxValue, periods[0].End);
-        Assert.Equal(s.StartTime, periods[0].Start);
+        Assert.Equal(TimeOnly.MinValue, periods[0].EndTime);
+        Assert.Equal(s.StartTime, periods[0].StartTime);
     }
     
     [Fact]
@@ -88,13 +88,13 @@ public class DailyRecurrenceBoundaryCrossingTests {
 
         var periods = s.SlotsAtDate(_today);
         Assert.Single(periods);
-        Assert.Equal(s.EndTime, periods[0].End);
-        Assert.Equal(TimeOnly.MinValue, periods[0].Start);
+        Assert.Equal(s.EndTime, periods[0].EndTime);
+        Assert.Equal(TimeOnly.MinValue, periods[0].StartTime);
 
         periods = s.SlotsAtDate(_afterTomorrow);
         Assert.Single(periods);
-        Assert.Equal(s.EndTime, periods[0].End);
-        Assert.Equal(TimeOnly.MinValue, periods[0].Start);
+        Assert.Equal(s.EndTime, periods[0].EndTime);
+        Assert.Equal(TimeOnly.MinValue, periods[0].StartTime);
     }
     
     # region OverlapDetection

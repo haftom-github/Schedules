@@ -15,19 +15,23 @@ public static class OverlapDetector {
                 if (overlapSeq is null || overlapSeq.IsEmpty)
                     continue;
 
-                var ownTimeRange = ownSequence.Tag == "before"
-                    ? schedule1.PeriodBeforeMidnight() : schedule1.PeriodAfterMidnight();
+                var ownSlots = ownSequence.Tag == "before"
+                    ? schedule1.SlotsBeforeMidnight() : schedule1.SlotsAfterMidnight();
                 
-                var otherTimeRange = otherSequence.Tag == "before"
-                    ? schedule2.PeriodBeforeMidnight() : schedule2.PeriodAfterMidnight();
+                var othersSlots = otherSequence.Tag == "before"
+                    ? schedule2.SlotsBeforeMidnight() : schedule2.SlotsAfterMidnight();
 
-                var commonRange = CommonRange(ownTimeRange, otherTimeRange);
-                if (!commonRange.IsPositive) continue;
+                var overlaps = Overlaps(ownSlots, othersSlots);
+                if (overlaps.All(s => s.IsEmpty)) continue;
                 var startDate = DateOnly.FromDayNumber(overlapSeq.Start);
                 DateOnly? endDate = overlapSeq.End != null 
                     ? DateOnly.FromDayNumber(overlapSeq.End!.Value) 
                     : null;
-                var overlapSchedule = new Schedule(startDate, endDate, commonRange.Start, commonRange.End);
+                
+                var overlapSchedule = new Schedule(
+                    overlaps.Where(o => !o.IsEmpty).ToList(),
+                    startDate, endDate);
+                
                 overlapSchedule.UpdateRecurrence(interval: overlapSeq.Interval);
                 overlapSchedules.Add(overlapSchedule);
             }
@@ -42,12 +46,15 @@ public static class OverlapDetector {
             for (var j = i + 1; j < schedules.Count; j++) {
                 var shift = FindShiftWith(schedules[i], schedules[j]);
                 if (shift is not 1) continue;
-                if (!(schedules[i].EndsAtMidnight && schedules[j].StartsAtMidnight)) continue;
+                
+                var mergedSlots = schedules[i].Slots.Concat(schedules[j].Slots).ToList();
+                if (mergedSlots.OverallSlotsSpan() > TimeSpan.FromHours(24))
+                    continue;
+                
                 var newStartDate = schedules[i].StartDate;
                 var newEndDate = schedules[i].EndDate;
-                var newStartTime = schedules[i].StartTime;
-                var newEndTime = schedules[j].EndTime;
-                var merged = new Schedule(newStartDate, newEndDate, newStartTime, newEndTime);
+                
+                var merged = new Schedule(mergedSlots, newStartDate, newEndDate);
                 merged.UpdateRecurrence(interval: schedules[i].RecurrenceInterval);
                 schedules.RemoveAt(j);
                 schedules[i] = merged;
@@ -63,8 +70,8 @@ public static class OverlapDetector {
                 if (schedules[j].RecurrenceInterval 
                     != schedules[i].RecurrenceInterval * 7) continue;
                 
-                if (schedules[j].StartTime != schedules[i].StartTime
-                    || schedules[j].EndTime != schedules[i].EndTime)
+                if (schedules[j].Slots.Count != schedules[i].Slots.Count || 
+                    schedules[j].Slots.Any(s => !schedules[i].Slots.Contains(s)))
                     continue;
                 
                 schedules[i].DaysOfWeek.Add(schedules[j].StartDate.DayOfWeek);
@@ -93,12 +100,8 @@ public static class OverlapDetector {
         return shift;
     }
     
-    private static TimeOnly Max(TimeOnly t1, TimeOnly t2) => t1 > t2 ? t1 : t2;
-    private static TimeOnly Min(TimeOnly t1, TimeOnly t2) => t1 < t2 ? t1 : t2;
-    
-    private static Slot CommonRange(Slot slot1, Slot slot2) {
-        return new Slot(Max(slot1.Start, slot2.Start), Min(slot1.End, slot2.End));
-    }
+    private static List<Slot> Overlaps(List<Slot> slots1, List<Slot> slots2) 
+        => slots1.SelectMany(s => s.Overlap(slots2)).ToList();
 }
 
 public static class ScheduleExtensions {
@@ -107,10 +110,11 @@ public static class ScheduleExtensions {
             return [schedule];
 
         var beforeMidnight = new Schedule(
+            schedule.Slots
+                .Select(s => s.BeforeMidnight)
+                .Where(s => !s.IsEmpty),
             schedule.StartDate, 
-            schedule.EndDate, 
-            schedule.StartTime, 
-            TimeOnly.MaxValue
+            schedule.EndDate
         );
         
         beforeMidnight.UpdateRecurrence(
@@ -120,10 +124,11 @@ public static class ScheduleExtensions {
         );
 
         var afterMidnight = new Schedule(
+            schedule.Slots
+                .Select(s => s.AfterMidnight)
+                .Where(s => !s.IsEmpty),
             schedule.StartDate.AddDays(1),
-            schedule.EndDate?.AddDays(1),
-            TimeOnly.MinValue, 
-            schedule.EndTime
+            schedule.EndDate?.AddDays(1)
         );
 
         var shiftedDaysOfWeek = schedule.DaysOfWeek
@@ -190,23 +195,24 @@ public static class ScheduleExtensions {
 
         foreach (var sequence in sequences) {
             if (sequence.IsMember(date.DayNumber)) {
-                periods.Add(sequence.Tag == "before"
-                    ? schedule.PeriodBeforeMidnight()
-                    : schedule.PeriodAfterMidnight());
+                periods.AddRange(sequence.Tag == "before"
+                    ? schedule.SlotsBeforeMidnight()
+                    : schedule.SlotsAfterMidnight());
             }
         }
 
         return periods;
     }
-    
-    public static Slot PeriodBeforeMidnight(this Schedule schedule) =>
-        schedule.CrossesDayBoundary 
-            ? new Slot(schedule.StartTime) 
-            : new Slot(schedule.StartTime, schedule.EndTime);
 
-    public static Slot PeriodAfterMidnight(this Schedule schedule) =>
-        schedule.CrossesDayBoundary 
-            ? new Slot(end: schedule.EndTime) 
-            : new Slot(schedule.StartTime, schedule.EndTime);
+    public static List<Slot> SlotsBeforeMidnight(this Schedule schedule) 
+        => schedule.Slots.Select(s => s.BeforeMidnight).Where(s => !s.IsEmpty).ToList();
 
+    public static List<Slot> SlotsAfterMidnight(this Schedule schedule) 
+        => schedule.Slots.Select(s => s.AfterMidnight).Where(s => !s.IsEmpty).ToList();
+
+    public static TimeSpan OverallSlotsSpan(this IEnumerable<Slot> slots) {
+        var slotsList = slots.ToList();
+        return (slotsList.MaxBy(s => s.EndSpan)?.EndSpan 
+               - slotsList.MinBy(s => s.StartSpan)?.StartSpan)!.Value;
+    }
 }

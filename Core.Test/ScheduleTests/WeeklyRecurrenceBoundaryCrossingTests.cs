@@ -26,8 +26,8 @@ public class WeeklyRecurrenceBoundaryCrossingTests {
         var slots = s.SlotsAtDate(_today.AddDays(8));
         
         Assert.Single(slots);
-        Assert.Equal(TimeOnly.MinValue, slots[0].Start);
-        Assert.Equal(_twoOClock, slots[0].End);
+        Assert.Equal(TimeOnly.MinValue, slots[0].StartTime);
+        Assert.Equal(_twoOClock, slots[0].EndTime);
     }
     
     [Fact]
@@ -38,11 +38,11 @@ public class WeeklyRecurrenceBoundaryCrossingTests {
         var slots = s.SlotsAtDate(_today.AddDays(8));
         
         Assert.Equal(2, slots.Count);
-        Assert.Equal(_fiveOClock, slots[0].Start);
-        Assert.Equal(TimeOnly.MaxValue, slots[0].End);
+        Assert.Equal(_fiveOClock, slots[0].StartTime);
+        Assert.Equal(TimeOnly.MaxValue, slots[0].EndTime);
         
-        Assert.Equal(TimeOnly.MinValue, slots[1].Start);
-        Assert.Equal(_twoOClock, slots[1].End);
+        Assert.Equal(TimeOnly.MinValue, slots[1].StartTime);
+        Assert.Equal(_twoOClock, slots[1].EndTime);
     }
     
     [Fact]
@@ -53,8 +53,8 @@ public class WeeklyRecurrenceBoundaryCrossingTests {
         var slots = s.SlotsAtDate(_today.AddDays(7));
         
         Assert.Single(slots);
-        Assert.Equal(_fiveOClock, slots[0].Start);
-        Assert.Equal(TimeOnly.MaxValue, slots[0].End);
+        Assert.Equal(_fiveOClock, slots[0].StartTime);
+        Assert.Equal(TimeOnly.MaxValue, slots[0].EndTime);
     }
     
     [Fact]
@@ -65,10 +65,10 @@ public class WeeklyRecurrenceBoundaryCrossingTests {
         var slots = s.SlotsAtDate(_today.AddDays(8));
         
         Assert.Equal(2, slots.Count);
-        Assert.Equal(_fiveOClock, slots[0].Start);
-        Assert.Equal(TimeOnly.MaxValue, slots[0].End);
-        Assert.Equal(TimeOnly.MinValue, slots[1].Start);
-        Assert.Equal(_twoOClock, slots[1].End);
+        Assert.Equal(_fiveOClock, slots[0].StartTime);
+        Assert.Equal(TimeOnly.MaxValue, slots[0].EndTime);
+        Assert.Equal(TimeOnly.MinValue, slots[1].StartTime);
+        Assert.Equal(_twoOClock, slots[1].EndTime);
     }
     
     [Fact]
@@ -79,8 +79,8 @@ public class WeeklyRecurrenceBoundaryCrossingTests {
         var slots = s.SlotsAtDate(_today.AddDays(9));
         
         Assert.Single(slots);
-        Assert.Equal(TimeOnly.MinValue, slots[0].Start);
-        Assert.Equal(_twoOClock, slots[0].End);
+        Assert.Equal(TimeOnly.MinValue, slots[0].StartTime);
+        Assert.Equal(_twoOClock, slots[0].EndTime);
     }
 
     #region OverlapDetection

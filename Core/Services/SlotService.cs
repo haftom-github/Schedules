@@ -25,7 +25,7 @@ public static class SlotService {
     private static List<Slot> GenerateInternal(TimeSpan minSpan, List<Slot> working, List<Slot> blocking) {
         for (var i = 0; i < working.Count; i++) {
             foreach (var slot in blocking) {
-                if (!working[i].IsPositive) break;
+                if (working[i].IsEmpty) break;
                 var (org, biProd) = Block(working[i], slot);
                 working[i] = org;
                 if(biProd != null) working.Insert(i+1, biProd);
@@ -39,29 +39,29 @@ public static class SlotService {
 
         // slice each slot to a minimum slotSpan
         for (var i = 0; i < slots.Count; i++) {
-            if (!slots[i].IsPositive 
+            if (slots[i].IsEmpty 
                 || slots[i].Span < 2 * minSpan) 
                 continue;
             
-            slots.Insert(i+1, new Slot(slots[i].Start.Add(minSpan), slots[i].Span - minSpan));
-            slots[i] = new Slot(slots[i].Start, minSpan);
+            slots.Insert(i+1, new Slot(slots[i].StartSpan + minSpan, slots[i].StartSpan + minSpan + minSpan));
+            slots[i] = new Slot(slots[i].StartSpan, slots[i+1].StartSpan);
             
         }
         
-        var filtered = slots.Where(p => p.IsPositive && p.Span >= minSpan).ToList();
-        filtered.Sort((a, b) => a.Start.CompareTo(b.Start));
+        var filtered = slots.Where(p => !p.IsEmpty && p.Span >= minSpan).ToList();
+        filtered.Sort((a, b) => a.StartSpan.CompareTo(b.StartSpan));
         return filtered;
     }
 
     private static (Slot orgi, Slot? biprod) Block(Slot working, Slot blocking) {
-        var org = new Slot(working.Start, Min(blocking.Start, working.End));
-        var biProd = new Slot(Max(blocking.End, working.Start), working.End);
+        var org = working with { EndSpan = Min(blocking.StartSpan, working.EndSpan) };
+        var biProd = working with { StartSpan = Max(blocking.EndSpan, working.StartSpan) };
 
-        if (!org.IsPositive) (org, biProd) = (biProd, org);
-        if (!biProd.IsPositive) biProd = null;
+        if (org.IsEmpty) (org, biProd) = (biProd, org);
+        if (biProd.IsEmpty) biProd = null;
         return (org, biProd);
     }
     
-    private static TimeOnly Min(TimeOnly a, TimeOnly b) => a < b ? a : b;
-    private static TimeOnly Max(TimeOnly a, TimeOnly b) => a > b ? a : b;
+    private static TimeSpan Min(TimeSpan a, TimeSpan b) => a < b ? a : b;
+    private static TimeSpan Max(TimeSpan a, TimeSpan b) => a > b ? a : b;
 }

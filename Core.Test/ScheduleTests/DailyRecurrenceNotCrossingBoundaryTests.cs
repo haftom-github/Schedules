@@ -45,8 +45,8 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         
         var periods = s.SlotsAtDate(_today);
         
-        Assert.Equal(_twoOClock, periods[0].Start);
-        Assert.Equal(_threeOClock, periods[0].End);
+        Assert.Equal(_twoOClock, periods[0].StartTime);
+        Assert.Equal(_threeOClock, periods[0].EndTime);
     }
 
     [Fact]

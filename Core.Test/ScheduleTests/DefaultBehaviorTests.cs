@@ -51,12 +51,6 @@ public class DefaultBehaviorTests
     }
 
     [Fact]
-    public void StartTimeCannotBeEqualToEndTime()
-    {
-        Assert.Throws<ArgumentException>(() => new Schedule(_today, _tomorrow, _threeOClock, _threeOClock));
-    }
-
-    [Fact]
     public void CrossBoundary_Allowed()
     {
         var s = new Schedule(_today, startTime: _fourOClock, endTime: _threeOClock);
