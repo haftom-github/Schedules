@@ -39,7 +39,7 @@ public class WeeklyRecurrenceBoundaryCrossingTests {
         
         Assert.Equal(2, slots.Count);
         Assert.Equal(_fiveOClock, slots[0].StartTime);
-        Assert.Equal(TimeOnly.MaxValue, slots[0].EndTime);
+        Assert.Equal(TimeOnly.MinValue, slots[0].EndTime);
         
         Assert.Equal(TimeOnly.MinValue, slots[1].StartTime);
         Assert.Equal(_twoOClock, slots[1].EndTime);
@@ -54,7 +54,7 @@ public class WeeklyRecurrenceBoundaryCrossingTests {
         
         Assert.Single(slots);
         Assert.Equal(_fiveOClock, slots[0].StartTime);
-        Assert.Equal(TimeOnly.MaxValue, slots[0].EndTime);
+        Assert.Equal(TimeOnly.MinValue, slots[0].EndTime);
     }
     
     [Fact]
@@ -66,7 +66,7 @@ public class WeeklyRecurrenceBoundaryCrossingTests {
         
         Assert.Equal(2, slots.Count);
         Assert.Equal(_fiveOClock, slots[0].StartTime);
-        Assert.Equal(TimeOnly.MaxValue, slots[0].EndTime);
+        Assert.Equal(TimeOnly.MinValue, slots[0].EndTime);
         Assert.Equal(TimeOnly.MinValue, slots[1].StartTime);
         Assert.Equal(_twoOClock, slots[1].EndTime);
     }

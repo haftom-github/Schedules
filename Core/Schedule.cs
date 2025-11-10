@@ -19,7 +19,7 @@ public class Schedule {
     public bool EndsAtMidnight => _slots.MaxBy(s => s.EndSpan)?.EndTime == TimeOnly.MinValue;
 
     public Schedule(DateOnly startDate, DateOnly? endDate = null, TimeOnly? startTime = null, TimeOnly? endTime = null)
-        : this([new Slot(startTime ?? TimeOnly.MinValue, endTime ?? TimeOnly.MaxValue)], startDate, endDate) { }
+        : this([new Slot(startTime ?? TimeOnly.MinValue, endTime ?? TimeOnly.MinValue)], startDate, endDate) { }
 
     public Schedule(IEnumerable<Slot> slots, DateOnly startDate, DateOnly? endDate = null) {
         if (startDate > endDate)

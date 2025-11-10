@@ -16,10 +16,10 @@ public static class OverlapDetector {
                     continue;
 
                 var ownSlots = ownSequence.Tag == "before"
-                    ? schedule1.SlotsBeforeMidnight() : schedule1.SlotsAfterMidnight();
+                    ? schedule1.SlotsBeforeMidnight() : schedule1.SlotsAfterMidnight().Select(s => s.ShiftLeftByOneDay).ToList();
                 
                 var othersSlots = otherSequence.Tag == "before"
-                    ? schedule2.SlotsBeforeMidnight() : schedule2.SlotsAfterMidnight();
+                    ? schedule2.SlotsBeforeMidnight() : schedule2.SlotsAfterMidnight().Select(s => s.ShiftLeftByOneDay).ToList();
 
                 var overlaps = Overlaps(ownSlots, othersSlots);
                 if (overlaps.All(s => s.IsEmpty)) continue;
@@ -47,7 +47,10 @@ public static class OverlapDetector {
                 var shift = FindShiftWith(schedules[i], schedules[j]);
                 if (shift is not 1) continue;
                 
-                var mergedSlots = schedules[i].Slots.Concat(schedules[j].Slots).ToList();
+                var mergedSlots = schedules[i].Slots
+                    .Concat(schedules[j].Slots.Select(s => s.ShiftRightByOneDay))
+                    .ToList();
+                
                 if (mergedSlots.OverallSlotsSpan() > TimeSpan.FromHours(24))
                     continue;
                 

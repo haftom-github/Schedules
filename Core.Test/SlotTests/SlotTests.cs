@@ -1,10 +1,10 @@
 namespace Core.Test.SlotTests;
 
 public class SlotTests {
-    private TimeOnly _twoOclock = new(2, 0);
-    private TimeOnly _threeOclock = new(3, 0);
-    private TimeOnly _fourOclock = new(4, 0);
-    private TimeOnly _eightOclock = new(8, 0);
+    private readonly TimeOnly _twoOClock = new(2, 0);
+    private readonly TimeOnly _threeOClock = new(3, 0);
+    private readonly TimeOnly _fourOClock = new(4, 0);
+    private readonly TimeOnly _eightOClock = new(8, 0);
     
     [Fact]
     public void SameSlotsShouldOverlap() {
@@ -17,8 +17,8 @@ public class SlotTests {
 
     [Fact]
     public void NonOverlappingSlotsShouldOverlap() {
-        var s1 = new Slot(_twoOclock, _threeOclock);
-        var s2 = new Slot(_threeOclock, _fourOclock);
+        var s1 = new Slot(_twoOClock, _threeOClock);
+        var s2 = new Slot(_threeOClock, _fourOClock);
         
         var overlap = s1.Overlap(s2);
         Assert.True(overlap.IsEmpty);
@@ -26,8 +26,8 @@ public class SlotTests {
 
     [Fact]
     public void ShouldOverlap_WhenOneIsInsideTheOtherSlot() {
-        var s1 = new Slot(_twoOclock, _eightOclock);
-        var s2 = new Slot(_threeOclock, _fourOclock);
+        var s1 = new Slot(_twoOClock, _eightOClock);
+        var s2 = new Slot(_threeOClock, _fourOClock);
         
         var overlap = s1.Overlap(s2);
         Assert.Equal(s2, overlap);
@@ -35,7 +35,7 @@ public class SlotTests {
 
     [Fact]
     public void ASlotOnTheSameDay_ShouldNotOverlap_WithASlotOnTheNextDay() {
-        var s1 = new Slot(_twoOclock, _threeOclock);
+        var s1 = new Slot(_twoOClock, _threeOClock);
         var s2 = new Slot(TimeSpan.FromHours(26), TimeSpan.FromHours(27));
         
         var overlap = s1.Overlap(s2);
@@ -44,8 +44,8 @@ public class SlotTests {
 
     [Fact]
     public void TwoMidnightCrossingSlots_ShouldOverlap() {
-        var s1 = new Slot(_threeOclock, _threeOclock);
-        var s2 = new Slot(_fourOclock, _fourOclock);
+        var s1 = new Slot(_threeOClock, _threeOClock);
+        var s2 = new Slot(_fourOClock, _fourOClock);
         
         var overlap = s1.Overlap(s2);
         Assert.False(overlap.IsEmpty);

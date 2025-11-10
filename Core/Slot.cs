@@ -31,8 +31,6 @@ public record Slot(TimeSpan StartSpan, TimeSpan EndSpan) {
     public Slot BeforeMidnight => Overlap(FullDay);
     public Slot AfterMidnight => Overlap(new Slot(TimeSpan.FromHours(24), TimeSpan.FromHours(48)));
 
-    public List<Slot> SplitAtMidnight() {
-        List<Slot> slices = [BeforeMidnight, AfterMidnight];
-        return slices.Where(s => !s.IsEmpty).ToList();
-    }
+    public Slot ShiftLeftByOneDay => new(StartSpan - TimeSpan.FromDays(1), EndSpan - TimeSpan.FromDays(1));
+    public Slot ShiftRightByOneDay => new(StartSpan + TimeSpan.FromDays(1), EndSpan + TimeSpan.FromDays(1));
 }
