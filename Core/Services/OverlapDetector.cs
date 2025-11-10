@@ -194,17 +194,17 @@ public static class ScheduleExtensions {
     }
     public static List<Slot> SlotsAtDate(this Schedule schedule, DateOnly date) {
         var sequences = schedule.ToSequencesList();
-        var periods = new List<Slot>();
+        var slots = new List<Slot>();
 
         foreach (var sequence in sequences) {
             if (sequence.IsMember(date.DayNumber)) {
-                periods.AddRange(sequence.Tag == "before"
+                slots.AddRange(sequence.Tag == "before"
                     ? schedule.SlotsBeforeMidnight()
                     : schedule.SlotsAfterMidnight());
             }
         }
 
-        return periods;
+        return slots;
     }
 
     public static List<Slot> SlotsBeforeMidnight(this Schedule schedule) 

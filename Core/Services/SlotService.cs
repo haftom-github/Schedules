@@ -43,7 +43,7 @@ public static class SlotService {
                 || slots[i].Span < 2 * minSpan) 
                 continue;
             
-            slots.Insert(i+1, new Slot(slots[i].StartSpan + minSpan, slots[i].StartSpan + minSpan + minSpan));
+            slots.Insert(i+1, new Slot(slots[i].StartSpan + minSpan, slots[i].EndSpan));
             slots[i] = new Slot(slots[i].StartSpan, slots[i+1].StartSpan);
             
         }
