@@ -1,27 +1,23 @@
+using System.Collections.Immutable;
+
 namespace Core;
 
-public class Schedule {
-    public DateOnly StartDate { get; }
-    public DateOnly? EndDate { get; }
-    public TimeOnly StartTime => _slots.MinBy(s => s.StartSpan)?.StartTime ?? throw new Exception("no slots specified");
-    public TimeOnly EndTime => _slots.MaxBy(s => s.EndSpan)?.EndTime ?? throw new Exception("no slots specified");
+public record Schedule {
+    public DateOnly StartDate { get; init; }
+    public DateOnly? EndDate { get; init; }
+    public IReadOnlyList<Slot> Slices { get; init; }
+    public Recurrence Recurrence { get; init; }
 
-    private readonly List<Slot> _slots;
-    public IReadOnlyList<Slot> Slots => _slots.AsReadOnly();
-
-    public RecurrenceType RecurrenceType { get; private set; } = RecurrenceType.Daily;
-    public int RecurrenceInterval { get; private set; } = 1;
-    public HashSet<DayOfWeek> DaysOfWeek { get; } = [];
+    public TimeOnly StartTime => Slices.MinBy(s => s.StartSpan)?.StartTime ?? throw new Exception("no slots specified");
+    public TimeOnly EndTime => Slices.MaxBy(s => s.EndSpan)?.EndTime ?? throw new Exception("no slots specified");
 
     public bool IsForever => EndDate is null;
-    public bool CrossesDayBoundary => _slots.Any(s => s.ExtendsBeyondBoundary);
-    public bool StartsAtMidnight => _slots.MinBy(s => s.StartSpan)?.StartTime == TimeOnly.MinValue;
-    public bool EndsAtMidnight => _slots.MaxBy(s => s.EndSpan)?.EndTime == TimeOnly.MinValue;
+    public bool CrossesDayBoundary => Slices.Any(s => s.ExtendsBeyondBoundary);
 
-    public Schedule(DateOnly startDate, DateOnly? endDate = null, TimeOnly? startTime = null, TimeOnly? endTime = null)
-        : this([new Slot(startTime ?? TimeOnly.MinValue, endTime ?? TimeOnly.MinValue)], startDate, endDate) { }
+    public Schedule(DateOnly startDate, DateOnly? endDate = null, TimeOnly? startTime = null, TimeOnly? endTime = null, Recurrence? recurrence = null)
+        : this([new Slot(startTime ?? TimeOnly.MinValue, endTime ?? TimeOnly.MinValue)], startDate, endDate, recurrence) { }
 
-    public Schedule(IEnumerable<Slot> slots, DateOnly startDate, DateOnly? endDate = null) {
+    public Schedule(IEnumerable<Slot> slots, DateOnly startDate, DateOnly? endDate = null, Recurrence? recurrence = null) {
         if (startDate > endDate)
             throw new ArgumentException("end of schedule should not come before its start");
         
@@ -38,27 +34,12 @@ public class Schedule {
             > TimeSpan.FromHours(24))
             throw new ArgumentOutOfRangeException(nameof(slots), "all slots should lie within 24 hours");
         
-        _slots = slotsList;
+        Slices = slotsList;
         StartDate = startDate;
         EndDate = endDate;
-    }
-
-    public void UpdateRecurrence(RecurrenceType? type = null, int? interval = null, HashSet<DayOfWeek>? daysOfWeek = null) {
-        
-        if (interval is not null) {
-            if (interval <= 0)
-                throw new ArgumentException("recurrence interval must be positive");
-
-            RecurrenceInterval = interval.Value;
-        }
-
-        if (type is not null)
-            RecurrenceType = type.Value;
-
-        if (daysOfWeek is null) return;
-        DaysOfWeek.Clear();
-        foreach (var day in daysOfWeek)
-            DaysOfWeek.Add(day);
+        Recurrence = recurrence ?? Recurrence.Daily();
+        if (Recurrence.Interval < 1)
+            throw new ArgumentException("interval can not be less than 1");
     }
 }
 
@@ -66,4 +47,25 @@ public enum RecurrenceType
 {
     Daily,
     Weekly
+}
+
+public sealed record Recurrence(
+    RecurrenceType Type, 
+    int Interval, 
+    ImmutableHashSet<DayOfWeek> DaysOfWeek
+)
+{ 
+    public static Recurrence Daily(int interval = 1)
+        => new(
+            Type:RecurrenceType.Daily, 
+            Interval:interval, 
+            DaysOfWeek:ImmutableHashSet<DayOfWeek>.Empty
+        );
+
+    public static Recurrence Weekly(IEnumerable<DayOfWeek> daysOfWeek, int interval = 1)
+        => new(
+            Type:RecurrenceType.Weekly,
+            Interval:interval,
+            DaysOfWeek:daysOfWeek.ToImmutableHashSet()
+        );
 }

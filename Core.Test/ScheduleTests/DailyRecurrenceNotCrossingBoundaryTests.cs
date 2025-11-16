@@ -22,9 +22,8 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
     {
         var s = new Schedule(_today);
         Assert.Empty(s.SlotsAtDate(_yesterday));
-        
-        s.UpdateRecurrence(interval: 3);
-        Assert.Empty(s.SlotsAtDate(_tomorrow));
+        var s2 = s with { Recurrence = Recurrence.Daily(3) };
+        Assert.Empty(s2.SlotsAtDate(_tomorrow));
     }
 
     [Fact]
@@ -49,23 +48,6 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
         Assert.Equal(_threeOClock, periods[0].EndTime);
     }
 
-    [Fact]
-    public void ShouldUpdateRecurrence()
-    {
-        var s = new Schedule(_today);
-
-        s.UpdateRecurrence(interval: 2);
-        Assert.Equal(2, s.RecurrenceInterval);
-
-        s.UpdateRecurrence(type: RecurrenceType.Weekly);
-        Assert.Equal(2, s.RecurrenceInterval);
-        Assert.Equal(RecurrenceType.Weekly, s.RecurrenceType);
-
-        s.UpdateRecurrence(RecurrenceType.Daily, 3);
-        Assert.Equal(RecurrenceType.Daily, s.RecurrenceType);
-        Assert.Equal(3, s.RecurrenceInterval);
-    }
-
     #region OverlapDetection
 
     [Fact]
@@ -80,10 +62,7 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
     [Fact]
     public void ShouldOverlap_WhenDateRangesOverlap_AndRecursDaily() {
         var s1 = new Schedule(_today, _today);
-        s1.UpdateRecurrence(interval: 1);
-        
         var s2 = new Schedule(_today, _tomorrow);
-        s2.UpdateRecurrence(interval: 1);
         
         var overlaps = s1.OverlapScheduleWith(s2);
         Assert.Single(overlaps);
@@ -101,38 +80,33 @@ public class DailyRecurrenceNotCrossingBoundaryTests {
     [Fact]
     public void TheOverlap_ShouldRecurOnIntervalOf_2Days_WhenTheFirstRecursDaily_AndTheOtherEveryTwoDays() {
         var s = new Schedule(_today, _today);
-        var other = new Schedule(_today, _tomorrow);
-        other.UpdateRecurrence(interval: 2);
+        var other = new Schedule(_today, _tomorrow, recurrence:Recurrence.Daily(2));
 
         var overlaps = s.OverlapScheduleWith(other);
         Assert.Single(overlaps);
-        Assert.Equal(2, overlaps[0].RecurrenceInterval);
+        Assert.Equal(2, overlaps[0].Recurrence.Interval);
     }
 
     [Fact]
     public void Overlap_ShouldRecurEvery6Days_WhenEachRecurEvery_2_And_3_Days() {
         // *  .  *  .  *  .  *  .  *  .  *  .  *
         // #  .  .  #  .  .  #  .  .  #  .  .  #
-        var s = new Schedule(_today, _today.AddDays(5));
-        s.UpdateRecurrence(interval: 2);
-        var other = new Schedule(_today, _today.AddDays(5));
-        other.UpdateRecurrence(interval: 3);
+        var s = new Schedule(_today, _today.AddDays(5), recurrence:Recurrence.Daily(2));
+        var other = new Schedule(_today, _today.AddDays(5), recurrence:Recurrence.Daily(3));
 
         var overlaps = s.OverlapScheduleWith(other);
         Assert.Single(overlaps);
-        Assert.Equal(6, overlaps[0].RecurrenceInterval);
+        Assert.Equal(6, overlaps[0].Recurrence.Interval);
     }
 
     [Fact]
     public void Overlap_ShouldRecur_AtTheSameDay_WhenTheTwoSchedulesHave_TheSameRecurrence() {
-        var s = new Schedule(_today, _today);
-        s.UpdateRecurrence(interval: 2);
-        var other = new Schedule(_today, _today);
-        other.UpdateRecurrence(interval: 2);
+        var s = new Schedule(_today, _today, recurrence:Recurrence.Daily(2));
+        var other = new Schedule(_today, _today, recurrence:Recurrence.Daily(2));
         
         var overlaps = s.OverlapScheduleWith(other);
         Assert.Single(overlaps);
-        Assert.Equal(2, overlaps[0].RecurrenceInterval);
+        Assert.Equal(2, overlaps[0].Recurrence.Interval);
     }
 
     [Fact]

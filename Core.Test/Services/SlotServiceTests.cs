@@ -24,8 +24,10 @@ public class SlotServiceTests {
         _lastMonth = _today.AddDays(-30);
         _officeHours = new Schedule(_lastMonth, startTime:_2OClock, endTime:_11OClock);
         _nightShift = new Schedule(_lastMonth, startTime:_11OClock, endTime:oneOClock);
-        _weekend = new Schedule(_lastMonth);
-        _weekend.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Sunday, DayOfWeek.Saturday]);
+        _weekend = new Schedule(
+            startDate:_lastMonth,
+            recurrence:Recurrence.Weekly([DayOfWeek.Sunday, DayOfWeek.Saturday]));
+
         var lunchStart = new TimeOnly(10, 0);
         var lunchEnd = new TimeOnly(11, 0);
         _lunchBreak = new Schedule(_lastMonth, startTime: lunchStart, endTime: lunchEnd);
@@ -54,19 +56,25 @@ public class SlotServiceTests {
 
     [Fact]
     public void Generate_WhenScheduleCrossesBoundary() {
-        _nightShift.UpdateRecurrence(interval:10);
-        var slots = SlotService.GenerateSlots(_slotSpan, _today.AddDays(1), [_nightShift], []);
+        var ns2 = _nightShift with { Recurrence = _nightShift.Recurrence with{Interval = 10}};
+        var slots = SlotService.GenerateSlots(_slotSpan, _today.AddDays(1), [ns2], []);
         
         Assert.NotEmpty(slots);
     }
 
     [Fact]
     public void Generate_WhenMoreThanOneSchedule() {
-        var schedule1 = new Schedule(_lastMonth, startTime: _2OClock, endTime: _11OClock);
-        schedule1.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday]);
+        var schedule1 = new Schedule(
+            startDate:_lastMonth, 
+            startTime: _2OClock, 
+            endTime: _11OClock,
+            recurrence: Recurrence.Weekly([DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday]));
 
-        var saturdays = new Schedule( _lastMonth, startTime: _2OClock, endTime: new TimeOnly(9, 0));
-        saturdays.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek:[DayOfWeek.Saturday]);
+        var saturdays = new Schedule(
+            startDate:_lastMonth, 
+            startTime: _2OClock, 
+            endTime: new TimeOnly(9, 0),
+            recurrence:Recurrence.Weekly([DayOfWeek.Saturday]));
 
         var slots = SlotService.GenerateSlots(_slotSpan, _today, [schedule1, saturdays], [_coffeeBreak, _lunchBreak]);
 

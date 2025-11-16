@@ -16,12 +16,12 @@
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ECSharpPlaceEmbeddedOnSameLineMigration/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ECSharpUseContinuousIndentInsideBracesMigration/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ESettingsUpgrade_002EMigrateBlankLinesAroundFieldToBlankLinesAroundProperty/@EntryIndexedValue">True</s:Boolean>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a909521d_002D7d4f_002D40bd_002Db5b1_002D0e09a18bd7dd/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="WeeklyRecurrenceNotCrossingBoundaryTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.ScheduleTests.WeeklyRecurrenceNotCrossingBoundaryTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;xUnit::7CA57A64-20AB-4365-976F-B83E699BB6CA::net9.0::Core.Test.SlotTests.SlotTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b7c0ce4c_002D0e04_002D4f3d_002D9c08_002D70fc721d09f8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from &amp;lt;test&amp;gt;\&amp;lt;Core.Test&amp;gt;" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Project Location="/home/haftom/Desktop/Schedules/Core.Test" Presentation="&amp;lt;test&amp;gt;\&amp;lt;Core.Test&amp;gt;" /&gt;
 &lt;/SessionState&gt;</s:String>
+	
+	
+	
 	
 	
 	

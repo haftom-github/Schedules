@@ -66,8 +66,7 @@ public class DailyRecurrenceBoundaryCrossingTests {
     [Fact]
     public void DatesOnEvenDistanceFromStart_ShouldHaveASingleBeforeMidNightSlot_WhenRecurringEveryTwoDays()
     {
-        var s = new Schedule(_yesterday, startTime: _fiveOClock, endTime: _fourOClock);
-        s.UpdateRecurrence(interval: 2);
+        var s = new Schedule(_yesterday, startTime: _fiveOClock, endTime: _fourOClock, recurrence: Recurrence.Daily(2));
 
         var periods = s.SlotsAtDate(_yesterday);
         Assert.Single(periods);
@@ -83,8 +82,7 @@ public class DailyRecurrenceBoundaryCrossingTests {
     [Fact]
     public void DatesOnOddDistanceFromStart_ShouldHaveASingleAfterMidnightSot_WhenRecurringEveryTwoDays()
     {
-        var s = new Schedule(_yesterday, startTime: _fiveOClock, endTime: _fourOClock);
-        s.UpdateRecurrence(interval: 2);
+        var s = new Schedule(_yesterday, startTime: _fiveOClock, endTime: _fourOClock, recurrence: Recurrence.Daily(2));
 
         var periods = s.SlotsAtDate(_today);
         Assert.Single(periods);
@@ -146,10 +144,19 @@ public class DailyRecurrenceBoundaryCrossingTests {
         // |...0....|...1....|...2....|...3....|...4....|...5....|
         // |......##|####....|......##|####....|......##|####....|
         // |........|.......#|#.......|........|.......#|#.......|
-        var other = new Schedule(_today, _today.AddDays(4), _fourOClock, _threeOClock);
-        other.UpdateRecurrence(interval: 2);
-        var s = new Schedule(_tomorrow, _today.AddDays(4), _fiveOClock, _twoOClock);
-        s.UpdateRecurrence(interval: 3);
+        var other = new Schedule(
+            startDate:_today, 
+            endDate:_today.AddDays(4), 
+            startTime:_fourOClock, 
+            endTime:_threeOClock, 
+            recurrence: Recurrence.Daily(2));
+        
+        var s = new Schedule(
+            startDate:_tomorrow, 
+            endDate:_today.AddDays(4), 
+            startTime:_fiveOClock, 
+            endTime:_twoOClock, 
+            recurrence: Recurrence.Daily(3));
         
         var overlaps = s.OverlapScheduleWith(other);
         Assert.Single(overlaps);
@@ -166,11 +173,9 @@ public class DailyRecurrenceBoundaryCrossingTests {
         // |..######|#.......|..######|#.......|..######|#.......|
         // |........|.......#|###.....|.......#|###.....|........|
 
-        var s = new Schedule(_today, _today.AddDays(4), _sixOClock, _twoOClock);
-        s.UpdateRecurrence(interval: 2);
+        var s = new Schedule(_today, _today.AddDays(4), _sixOClock, _twoOClock, recurrence: Recurrence.Daily(2));
 
-        var other = new Schedule(_tomorrow, _today.AddDays(4), _nineOClock, _eightOClock);
-        other.UpdateRecurrence(interval: 2);
+        var other = new Schedule(_tomorrow, _today.AddDays(4), _nineOClock, _eightOClock, recurrence: Recurrence.Daily(2));
 
         var overlaps = s.OverlapScheduleWith(other);
         Assert.Single(overlaps);

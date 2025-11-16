@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Core.Options;
 using Core.Sequences;
 
@@ -30,9 +31,8 @@ public static class OverlapDetector {
                 
                 var overlapSchedule = new Schedule(
                     overlaps.Where(o => !o.IsEmpty).ToList(),
-                    startDate, endDate);
+                    startDate, endDate, Recurrence.Daily(overlapSeq.Interval));
                 
-                overlapSchedule.UpdateRecurrence(interval: overlapSeq.Interval);
                 overlapSchedules.Add(overlapSchedule);
             }
         }
@@ -47,8 +47,8 @@ public static class OverlapDetector {
                 var shift = FindShiftWith(schedules[i], schedules[j]);
                 if (shift is not 1) continue;
                 
-                var mergedSlots = schedules[i].Slots
-                    .Concat(schedules[j].Slots.Select(s => s.ShiftRightByOneDay))
+                var mergedSlots = schedules[i].Slices
+                    .Concat(schedules[j].Slices.Select(s => s.ShiftRightByOneDay))
                     .ToList();
                 
                 if (mergedSlots.OverallSlotsSpan() > TimeSpan.FromHours(24))
@@ -57,8 +57,8 @@ public static class OverlapDetector {
                 var newStartDate = schedules[i].StartDate;
                 var newEndDate = schedules[i].EndDate;
                 
-                var merged = new Schedule(mergedSlots, newStartDate, newEndDate);
-                merged.UpdateRecurrence(interval: schedules[i].RecurrenceInterval);
+                var merged = new Schedule(mergedSlots, newStartDate, newEndDate, schedules[i].Recurrence);
+                // merged.UpdateRecurrence(interval: schedules[i].RecurrenceInterval);
                 schedules.RemoveAt(j);
                 schedules[i] = merged;
                 break;
@@ -66,18 +66,29 @@ public static class OverlapDetector {
         }
 
         for (var i = 0; i < schedules.Count; i++) {
-            if (schedules[i].RecurrenceInterval % 7 != 0) continue;
-            var weeklyRecurrenceInterval = schedules[i].RecurrenceInterval / 7;
-            schedules[i].UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [schedules[i].StartDate.DayOfWeek], interval: weeklyRecurrenceInterval);
+            if (schedules[i].Recurrence.Interval % 7 != 0) continue;
+            var weeklyRecurrenceInterval = schedules[i].Recurrence.Interval / 7;
+            schedules[i] = schedules[i] with {
+                Recurrence = Recurrence.Weekly(
+                    [schedules[i].StartDate.DayOfWeek], 
+                    interval: weeklyRecurrenceInterval
+                )
+            };
             for (var j = i + 1; j < schedules.Count; j++) {
-                if (schedules[j].RecurrenceInterval 
-                    != schedules[i].RecurrenceInterval * 7) continue;
+                if (schedules[j].Recurrence.Interval 
+                    != schedules[i].Recurrence.Interval * 7) continue;
                 
-                if (schedules[j].Slots.Count != schedules[i].Slots.Count || 
-                    schedules[j].Slots.Any(s => !schedules[i].Slots.Contains(s)))
+                if (schedules[j].Slices.Count != schedules[i].Slices.Count || 
+                    schedules[j].Slices.Any(s => !schedules[i].Slices.Contains(s)))
                     continue;
                 
-                schedules[i].DaysOfWeek.Add(schedules[j].StartDate.DayOfWeek);
+                schedules[i] = schedules[i] with {
+                    Recurrence = schedules[i].Recurrence with { 
+                        DaysOfWeek = schedules[i].Recurrence.DaysOfWeek
+                            .Append(schedules[j].StartDate.DayOfWeek)
+                            .ToImmutableHashSet()
+                    }
+                };
                 schedules.RemoveAt(j);
                 j--;
             }
@@ -87,8 +98,8 @@ public static class OverlapDetector {
     }
     
     private static int? FindShiftWith(Schedule schedule1, Schedule schedule2) {
-        if (schedule1.RecurrenceInterval 
-            != schedule2.RecurrenceInterval) return null;
+        if (schedule1.Recurrence.Interval 
+            != schedule2.Recurrence.Interval) return null;
 
         var seq = schedule1.ToSequencesList().First(s => s.Tag == "before");
         var otherSeq = schedule2.ToSequencesList().First(s => s.Tag == "before");
@@ -112,37 +123,24 @@ public static class ScheduleExtensions {
         if (!schedule.CrossesDayBoundary)
             return [schedule];
 
-        var beforeMidnight = new Schedule(
-            schedule.Slots
+        var beforeMidnight = schedule with {
+            Slices = schedule.Slices
                 .Select(s => s.BeforeMidnight)
-                .Where(s => !s.IsEmpty),
-            schedule.StartDate, 
-            schedule.EndDate
-        );
-        
-        beforeMidnight.UpdateRecurrence(
-            type: schedule.RecurrenceType, 
-            daysOfWeek: schedule.DaysOfWeek, 
-            interval: schedule.RecurrenceInterval
-        );
+                .Where(s => !s.IsEmpty)
+                .ToList() 
+        };
 
         var afterMidnight = new Schedule(
-            schedule.Slots
+            slots: schedule.Slices
                 .Select(s => s.AfterMidnight)
                 .Where(s => !s.IsEmpty),
-            schedule.StartDate.AddDays(1),
-            schedule.EndDate?.AddDays(1)
-        );
-
-        var shiftedDaysOfWeek = schedule.DaysOfWeek
-            .Select(d => d.ToNextDayOfWeek())
-            .ToHashSet();
-        
-        afterMidnight.UpdateRecurrence(
-            type: schedule.RecurrenceType, 
-            daysOfWeek: shiftedDaysOfWeek, 
-            interval: schedule.RecurrenceInterval
-        );
+            startDate: schedule.StartDate.AddDays(1),
+            endDate: schedule.EndDate?.AddDays(1),
+            recurrence: schedule.Recurrence with {
+                DaysOfWeek = schedule.Recurrence.DaysOfWeek
+                    .Select(d => d.ToNextDayOfWeek())
+                    .ToImmutableHashSet()
+            });
         
         return [beforeMidnight, afterMidnight];
     }
@@ -152,20 +150,20 @@ public static class ScheduleExtensions {
         List<ISequence> sequences = [];
 
         for (var i = 0; i < splits.Count; i++) {
-            switch (splits[i].RecurrenceType) {
+            switch (splits[i].Recurrence.Type) {
                 case RecurrenceType.Daily:
                     sequences.Add(
                         SequenceFactory.Create(
                             splits[i].StartDate.DayNumber,
                             splits[i].EndDate?.DayNumber,
-                            splits[i].RecurrenceInterval, tags[i])
+                            splits[i].Recurrence.Interval, tags[i])
                     );
                     break;
 
                 case RecurrenceType.Weekly:
-                    if (splits[i].DaysOfWeek.Count == 0) break;
+                    if (splits[i].Recurrence.DaysOfWeek.Count == 0) break;
                     
-                    foreach (var day in splits[i].DaysOfWeek)
+                    foreach (var day in splits[i].Recurrence.DaysOfWeek)
                     {
                         var start = splits[i].StartDate.ToFirstDayOfWeek();
                         while (start.DayOfWeek != day)
@@ -174,7 +172,7 @@ public static class ScheduleExtensions {
                         var sequence = SequenceFactory.Create(
                             start.DayNumber,
                             splits[i].EndDate?.DayNumber,
-                            splits[i].RecurrenceInterval * 7,
+                            splits[i].Recurrence.Interval * 7,
                             tags[i]
                         );
                         if (sequence.Start < splits[i].StartDate.DayNumber)
@@ -208,10 +206,10 @@ public static class ScheduleExtensions {
     }
 
     public static List<Slot> SlotsBeforeMidnight(this Schedule schedule) 
-        => schedule.Slots.Select(s => s.BeforeMidnight).Where(s => !s.IsEmpty).ToList();
+        => schedule.Slices.Select(s => s.BeforeMidnight).Where(s => !s.IsEmpty).ToList();
 
     public static List<Slot> SlotsAfterMidnight(this Schedule schedule) 
-        => schedule.Slots.Select(s => s.AfterMidnight).Where(s => !s.IsEmpty).ToList();
+        => schedule.Slices.Select(s => s.AfterMidnight).Where(s => !s.IsEmpty).ToList();
 
     public static TimeSpan OverallSlotsSpan(this IEnumerable<Slot> slots) {
         var slotsList = slots.ToList();

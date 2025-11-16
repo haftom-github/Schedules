@@ -18,17 +18,18 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
     [Fact]
     public void ShouldRecurWeekly_AtSpecifiedInterval()
     {
-        var s = new Schedule(_today);
+        var s = new Schedule(
+            startDate:_today, 
+            recurrence: Recurrence.Weekly([DayOfWeek.Monday]));
 
-        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Monday]);
-        Assert.Equal(RecurrenceType.Weekly, s.RecurrenceType);
-        Assert.Single(s.DaysOfWeek);
-        Assert.Contains(DayOfWeek.Monday, s.DaysOfWeek);
+        Assert.Equal(RecurrenceType.Weekly, s.Recurrence.Type);
+        Assert.Single(s.Recurrence.DaysOfWeek);
+        Assert.Contains(DayOfWeek.Monday, s.Recurrence.DaysOfWeek);
 
-        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [], interval: 5);
-        Assert.Equal(5, s.RecurrenceInterval);
-        Assert.Empty(s.DaysOfWeek);
-        Assert.Equal(RecurrenceType.Weekly, s.RecurrenceType);
+        var s2 = s with { Recurrence = Recurrence.Weekly([], 5) };
+        Assert.Equal(5, s2.Recurrence.Interval);
+        Assert.Empty(s2.Recurrence.DaysOfWeek);
+        Assert.Equal(RecurrenceType.Weekly, s2.Recurrence.Type);
     }
     
     
@@ -36,24 +37,29 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
     [Fact]
     public void ShouldHave_ZeroSlots_WhenDayOfWeekIsNotOnSchedule() 
     {
-        var s = new Schedule(_today);
-        
-        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek]);
+        var s = new Schedule(_today, recurrence:Recurrence.Weekly([_today.DayOfWeek]));
         Assert.Empty(s.SlotsAtDate(_tomorrow)); 
     }
 
     [Fact]
     public void TheLastDayWithInSchedule_ShouldHaveASlot() {
-        var s = new Schedule(_today, _today.AddDays(8));
-        s.UpdateRecurrence(type: RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek]);
+        var s = new Schedule(
+            startDate:_today, 
+            endDate:_today.AddDays(8),
+            recurrence:Recurrence.Weekly([_today.DayOfWeek]));
+
         Assert.Single(s.SlotsAtDate(_today.AddDays(7)));
     }
     
     // general case
     [Fact]
     public void ADayWithInSchedule_ShouldHaveASlot_ConsecutiveDaysStart() {
-        var s = new Schedule(_today, _today.AddDays(15), _twoOClock, _fiveOClock);
-        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek, _tomorrow.DayOfWeek]);
+        var s = new Schedule(
+            startDate:_today, 
+            endDate:_today.AddDays(15), 
+            startTime:_twoOClock, 
+            endTime:_fiveOClock,
+            recurrence:Recurrence.Weekly([_today.DayOfWeek, _tomorrow.DayOfWeek]));
         
         var slots = s.SlotsAtDate(_today.AddDays(7));
         
@@ -82,15 +88,23 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
         // |..####..|........|........|........|........|........|........|..####..|
         // |....###.|........|........|........|........|........|........|....###.|
         
-        var s = new Schedule(_today, _today.AddDays(7), _twoOClock, _fiveOClock);
-        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [_today.DayOfWeek]);
+        var s = new Schedule(
+            startDate:_today, 
+            endDate:_today.AddDays(7), 
+            startTime:_twoOClock, 
+            endTime:_fiveOClock,
+            recurrence:Recurrence.Weekly([_today.DayOfWeek]));
         
-        var other = new Schedule(_today, _today.AddDays(8), _fourOClock, _fiveOClock);
-        other.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Monday]);
+        var other = new Schedule(
+            startDate:_today, 
+            endDate:_today.AddDays(8), 
+            startTime:_fourOClock, 
+            endTime:_fiveOClock,
+            recurrence:Recurrence.Weekly([DayOfWeek.Monday]));
         
         var overlaps = s.OverlapScheduleWith(other);
         Assert.Single(overlaps);
-        Assert.Equal(RecurrenceType.Weekly, overlaps[0].RecurrenceType);
+        Assert.Equal(RecurrenceType.Weekly, overlaps[0].Recurrence.Type);
     }
 
     [Fact]
@@ -100,18 +114,25 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
         // |..####..|..####..|..####..|........|........|........|........|..####..|..####..|..####..|........|........|........|........|
         // |....###.|........|....###.|....###.|........|........|........|....###.|........|....###.|....###.|........|........|........|
         
-        var s = new Schedule(_today, startTime:_twoOClock, endTime:_fiveOClock);
-        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday]);
+        var s = new Schedule(
+            startDate:_today, 
+            startTime:_twoOClock, 
+            endTime:_fiveOClock,
+            recurrence: Recurrence.Weekly([DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday]));
         
-        var other = new Schedule(_today, startTime:_fourOClock, endTime:_fiveOClock);
-        other.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek: [DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Thursday]);
+        var other = new Schedule(
+            startDate:_today, 
+            startTime:_fourOClock, 
+            endTime:_fiveOClock,
+            recurrence: Recurrence.Weekly([DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Thursday])
+            );
         
         var overlaps = s.OverlapScheduleWith(other);
         Assert.Single(overlaps);
-        Assert.Equal(RecurrenceType.Weekly, overlaps[0].RecurrenceType);
-        Assert.Equal(2, overlaps[0].DaysOfWeek.Count);
-        Assert.Contains(DayOfWeek.Monday, overlaps[0].DaysOfWeek);
-        Assert.Contains(DayOfWeek.Wednesday, overlaps[0].DaysOfWeek);
+        Assert.Equal(RecurrenceType.Weekly, overlaps[0].Recurrence.Type);
+        Assert.Equal(2, overlaps[0].Recurrence.DaysOfWeek.Count);
+        Assert.Contains(DayOfWeek.Monday, overlaps[0].Recurrence.DaysOfWeek);
+        Assert.Contains(DayOfWeek.Wednesday, overlaps[0].Recurrence.DaysOfWeek);
     }
 
     [Fact]
@@ -120,18 +141,24 @@ public class WeeklyRecurrenceNotCrossingBoundaryTests {
         // |..####..|..####..|........|........|..####..|..####..|........|........|..####..|..####..|........|........|..####..|..####..|
         // |....###.|........|........|........|........|........|....###.|........|........|........|........|........|....###.|........|
 
-        var s = new Schedule(_today, startTime: _twoOClock, endTime: _fourOClock);
-        s.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek:[DayOfWeek.Monday, DayOfWeek.Tuesday], interval:2);
+        var s = new Schedule(
+            startDate:_today, 
+            startTime: _twoOClock, 
+            endTime: _fourOClock,
+            recurrence: Recurrence.Weekly([DayOfWeek.Monday, DayOfWeek.Tuesday], 2));
         
-        var other = new Schedule(_today, startTime: _twoOClock, endTime: _fiveOClock);
-        other.UpdateRecurrence(RecurrenceType.Weekly, daysOfWeek:[DayOfWeek.Monday], interval:3);
+        var other = new Schedule(
+            startDate:_today, 
+            startTime: _twoOClock, 
+            endTime: _fiveOClock,
+            recurrence:Recurrence.Weekly([DayOfWeek.Monday], 3));
         
         var overlaps = s.OverlapScheduleWith(other);
         Assert.Single(overlaps);
-        Assert.Equal(RecurrenceType.Weekly, overlaps[0].RecurrenceType);
-        Assert.Single(overlaps[0].DaysOfWeek);
-        Assert.Contains(DayOfWeek.Monday, overlaps[0].DaysOfWeek);
-        Assert.Equal(6, overlaps[0].RecurrenceInterval);
+        Assert.Equal(RecurrenceType.Weekly, overlaps[0].Recurrence.Type);
+        Assert.Single(overlaps[0].Recurrence.DaysOfWeek);
+        Assert.Contains(DayOfWeek.Monday, overlaps[0].Recurrence.DaysOfWeek);
+        Assert.Equal(6, overlaps[0].Recurrence.Interval);
     }
 
     #endregion

@@ -34,20 +34,19 @@ public class DefaultBehaviorTests
     [Fact]
     public void ShouldRecurDaily()
     {
-        Assert.Equal(RecurrenceType.Daily, new Schedule(_today).RecurrenceType);
+        Assert.Equal(RecurrenceType.Daily, new Schedule(_today).Recurrence.Type);
     }
 
     [Fact]
     public void HasRecurrenceIntervalOf_One()
     {
-        Assert.Equal(1, new Schedule(_today).RecurrenceInterval);
+        Assert.Equal(1, new Schedule(_today).Recurrence.Interval);
     }
 
     [Fact]
     public void ShouldNotAllowANonPositiveRecurrenceInterval()
     {
-        var s = new Schedule(_today);
-        Assert.Throws<ArgumentException>(() => s.UpdateRecurrence(interval: 0));
+        Assert.Throws<ArgumentException>(() => new Schedule(_today, recurrence:Recurrence.Daily(0)));
     }
 
     [Fact]
