@@ -1,6 +1,6 @@
 namespace Core.Sequences;
 
-public class FiniteSequence : ISequence {
+public record FiniteSequence : ISequence {
     public int Start { get; }
     public int? End { get; }
     public int Interval { get; }
@@ -44,29 +44,5 @@ public class FiniteSequence : ISequence {
         var start = Math.Max(Start, Start + n * Interval);
         
         return new FiniteSequence(start, Math.Min(End!.Value, other.End ?? End!.Value + 1), Interval);
-    }
-
-
-    // equatable implementations
-    public bool Equals(ISequence? other) {
-        return Start == other?.Start && End == other.End && Interval == other.Interval;
-    }
-
-    public override bool Equals(object? obj) {
-        if (obj is null) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        return obj.GetType() == GetType() && Equals((FiniteSequence)obj);
-    }
-
-    public override int GetHashCode() {
-        return HashCode.Combine(Start, End, Interval);
-    }
-
-    public static bool operator ==(FiniteSequence? left, FiniteSequence? right) {
-        return Equals(left, right);
-    }
-
-    public static bool operator !=(FiniteSequence? left, FiniteSequence? right) {
-        return !Equals(left, right);
     }
 }

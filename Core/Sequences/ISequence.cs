@@ -1,6 +1,6 @@
 namespace Core.Sequences;
 
-public interface ISequence : IEquatable<ISequence> {
+public interface ISequence {
     public int Start { get; }
     public int? End { get; }
     public int Interval { get; }
