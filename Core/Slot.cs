@@ -6,7 +6,7 @@ public record Slot(TimeSpan StartSpan, TimeSpan EndSpan) {
     public TimeSpan Span => EndSpan - StartSpan;
     public bool ExtendsBeyondBoundary => EndSpan > TimeSpan.FromDays(1);
     public bool IsEmpty => Span <= TimeSpan.Zero;
-    public bool IsFullDay => StartTime == TimeOnly.MinValue && StartTime == EndTime;
+    public bool IsFullDay => StartTime == TimeOnly.MinValue && Span == TimeSpan.FromDays(1);
     
     public Slot(TimeSpan? startSpan = null, TimeSpan? EndSpan = null)
         : this(startSpan ?? TimeSpan.Zero, EndSpan ?? TimeSpan.FromHours(24)) { }
@@ -23,7 +23,8 @@ public record Slot(TimeSpan StartSpan, TimeSpan EndSpan) {
     }
     
     public List<Slot> Overlap(List<Slot> otherSlots) 
-        => otherSlots.Select(Overlap)
+        => otherSlots
+            .Select(Overlap)
             .ToList();
 
     public bool OverlapsWith(Slot otherSlot) => !Overlap(otherSlot).IsEmpty;

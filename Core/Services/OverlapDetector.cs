@@ -58,7 +58,6 @@ public static class OverlapDetector {
                 var newEndDate = schedules[i].EndDate;
                 
                 var merged = new Schedule(mergedSlots, newStartDate, newEndDate, schedules[i].Recurrence);
-                // merged.UpdateRecurrence(interval: schedules[i].RecurrenceInterval);
                 schedules.RemoveAt(j);
                 schedules[i] = merged;
                 break;
