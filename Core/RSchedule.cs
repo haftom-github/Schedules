@@ -4,49 +4,58 @@ namespace Core;
 
 public record RSchedule {
     public ImmutableArray<RSlot> Slots { get; }
-    public long Recurrence { get; }
-    public long RotationSpan { get; }
-    public long OffsetInRotationSpan { get; }
+    private long Recurrence { get; }
+    private Rotation Rotation { get; }
+    public bool IsEmpty => Slots.IsEmpty;
+    public long Start => Slots.Length > 0 ? Slots[0].Start : 0;
+    public long End => Slots.Length > 0 ? Slots[^1].End : 0;
+    private long OverallDuration => End - Start;
 
-    public RSchedule(IEnumerable<RSlot> slots, long recurrence, long rotationSpan = 1, long offsetInRotationSpan = 0) {
-
-        var ordered = slots
-            .Where(s => s.IsPositive)
+    public RSchedule(RSlot slot, long recurrence = 1, Rotation? rotation = null) 
+        : this([slot], recurrence, rotation) { }
+    
+    public RSchedule(IEnumerable<RSlot>? slots = null, long? recurrence = null, Rotation? rotation = null) {
+        Slots = slots
+            ?.Where(s => s.IsPositive)
             .OrderBy(slot => slot.Start)
-            .ToList();
+            .Merge()
+            .ToImmutableArray() ?? [];
 
-        if (ordered.Count == 0) {
-            throw new ArgumentException("zero positive slots are provided", nameof(slots));
-        }
+        Rotation = rotation ?? Rotation.NoRotation;
+        Recurrence = recurrence ?? OverallDuration;
 
-        var start = ordered.First().Start;
-        var end = ordered.Last().Start + ordered.Last().Duration;
-
-        if (end - start > RotationSpan * Recurrence) {
+        if (OverallDuration > Rotation.RotationSpan * Recurrence)
             throw new ArgumentException("overall range can not be greater than recurrence", nameof(recurrence));
-        }
-        Slots = [..ordered];
-
-        if (recurrence < 1) {
-            throw new ArgumentOutOfRangeException(nameof(recurrence), recurrence, "recurrence span must be greater than zero");
-        }
-        Recurrence = recurrence;
-
-        if (rotationSpan < 1) {
-            throw new ArgumentOutOfRangeException(nameof(rotationSpan), rotationSpan, "rotation span must be greater than zero");
-        }
-        RotationSpan = rotationSpan;
-        
-        if (offsetInRotationSpan < 0) {
-            throw new ArgumentOutOfRangeException(nameof(offsetInRotationSpan), offsetInRotationSpan, "offset must be greater than zero");
-        }
-        OffsetInRotationSpan = offsetInRotationSpan;
     }
 }
 
-public record LimitedRSchedule
-(
-    RSchedule RSchedule, 
-    long Start, 
-    long? End = null
-);
+public record Rotation {
+    public long RotationSpan { get; }
+    public ImmutableArray<long> OffsetsInRotationSpan { get; }
+
+    private Rotation(long rotationSpan, ImmutableArray<long> offsetsInRotationSpan) {
+        RotationSpan = rotationSpan;
+        OffsetsInRotationSpan = offsetsInRotationSpan;
+    }
+
+    public static Rotation NoRotation
+        => new(1, [0]);
+}
+
+public static class Extensions {
+    public static IEnumerable<RSlot> Merge(this IEnumerable<RSlot> slots) {
+        var slotsList = slots.ToList();
+        for (var i = 0; i < slotsList.Count; i++) {
+            for (var j = i + 1; j < slotsList.Count; j++) {
+                if (slotsList[i].CanBeMergedWith(slotsList[j])) {
+                    slotsList[i] = slotsList[i].Merge(slotsList[j]);
+                    slotsList.RemoveAt(j);
+                    i--;
+                    break;
+                }
+            }
+        }
+
+        return slotsList;
+    }
+}
