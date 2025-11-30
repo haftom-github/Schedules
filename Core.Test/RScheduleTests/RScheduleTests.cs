@@ -51,4 +51,24 @@ public class RScheduleTests {
         
         Assert.Equal(2, s.Slots.Length);
     }
+
+    [Fact]
+    public void OverallDuration_ShouldNotExtend_BeyondRecurrenceSpan() {
+        var slot = new RSlot(0, 2);
+        Assert.Throws<ArgumentException>(() => new RSchedule(slot, 1));
+        
+        var otherSlot = new RSlot(4, 3);
+        Assert.Throws<ArgumentException>(() => new RSchedule([slot, otherSlot], 6));
+    }
+
+    #region OverlapingRotationInstances
+
+    [Fact]
+    public void ShouldThrow_WhenRotationInstancesOverlap() {
+        var slot1 = new RSlot(0, 2);
+
+        Assert.Throws<ArgumentException>(() => new RSchedule(slot1, 2, new Rotation(2, [0, 1])));
+    }
+
+    #endregion
 }

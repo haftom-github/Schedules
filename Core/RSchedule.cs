@@ -11,7 +11,7 @@ public record RSchedule {
     public long End => Slots.Length > 0 ? Slots[^1].End : 0;
     private long OverallDuration => End - Start;
 
-    public RSchedule(RSlot slot, long recurrence = 1, Rotation? rotation = null) 
+    public RSchedule(RSlot slot, long? recurrence = null, Rotation? rotation = null) 
         : this([slot], recurrence, rotation) { }
     
     public RSchedule(IEnumerable<RSlot>? slots = null, long? recurrence = null, Rotation? rotation = null) {
@@ -33,7 +33,13 @@ public record Rotation {
     public long RotationSpan { get; }
     public ImmutableArray<long> OffsetsInRotationSpan { get; }
 
-    private Rotation(long rotationSpan, ImmutableArray<long> offsetsInRotationSpan) {
+    public Rotation(long rotationSpan, ImmutableArray<long> offsetsInRotationSpan) {
+        if (rotationSpan <= 0)
+            throw new ArgumentOutOfRangeException(nameof(rotationSpan), "Rotation span should be greater than zero");
+        
+        if (offsetsInRotationSpan.Any(o => o < 0 || o >= rotationSpan ))
+            throw new ArgumentOutOfRangeException(nameof(offsetsInRotationSpan), $"Offsets must be between 0 and {rotationSpan}");
+        
         RotationSpan = rotationSpan;
         OffsetsInRotationSpan = offsetsInRotationSpan;
     }
@@ -58,4 +64,11 @@ public static class Extensions {
 
         return slotsList;
     }
+
+    public static LimitedRSchedule Limit(this RSchedule schedule, long start, long? end = null)
+        => new(schedule, start, end);
+}
+
+public record LimitedRSchedule(RSchedule Schedule, long Start, long? End = null) {
+    public bool IsEmpty => Start < (End ?? long.MaxValue) || Schedule.IsEmpty;
 }
