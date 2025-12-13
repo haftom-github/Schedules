@@ -40,7 +40,7 @@ public static class SequenceMath {
         return new InfiniteSequence(s1.S(x0 + t.Value * xStep), s1.Interval * Math.Abs(xStep));
     }
 
-    private static (int gcd, int x, int y) ExtendedGcd(int a, int b) {
+    public static (int gcd, int x, int y) ExtendedGcd(int a, int b) {
         if (a == 0) 
             return (b, 0, 1);
         

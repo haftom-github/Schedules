@@ -8,7 +8,7 @@ public readonly record struct RSlot(int Start, int Duration) {
     public bool IsPositive => Duration > 0;
     public bool IsNegative => Duration < 0;
     public bool IsEmpty => Duration == 0;
-    private static RSlot FromRange(int start, int end)
+    public static RSlot FromRange(int start, int end)
         => new(start,end - start);
     
     public RSlot GetOverlapWith(RSlot other) {
@@ -45,4 +45,7 @@ public readonly record struct RSlot(int Start, int Duration) {
             : FromRange(
                 Math.Max(Start, other.Last),
                 Math.Min(End, other.First));
+    
+    public RSlot Shift(int x)
+        => this with { Start = Start + x };
 }

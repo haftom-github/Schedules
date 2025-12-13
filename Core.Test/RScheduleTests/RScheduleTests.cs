@@ -64,10 +64,12 @@ public class RScheduleTests {
     #region OverlapingRotationInstances
 
     [Fact]
-    public void ShouldThrow_WhenRotationInstancesOverlap() {
+    public void HasOverlapsWithIn_RotationInstances() {
         var slot1 = new RSlot(0, 2);
 
-        Assert.Throws<ArgumentException>(() => new RSchedule(slot1, 2, new Rotation(2, [0, 1])));
+        var s = new RSchedule(slot1, 2, new Rotation(2, [0, 1]));
+        var overlaps = s.OverlapsWithIn;
+        Assert.True(overlaps.Any());
     }
 
     #endregion
